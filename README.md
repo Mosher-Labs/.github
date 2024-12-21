@@ -8,7 +8,9 @@
 ![GitHub License](https://img.shields.io/github/license/mosher-labs/.github)
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/mosher-labs)
 
-⚡⚔️🌩️ Welcome to Mosher Labs! Combining Scandinavian heritage and cutting-edge cloud technologies, we deliver precision-crafted solutions with AWS and Infrastructure as Code. ⚡⚔️🌩️
+⚡⚔️🌩️ Welcome to Mosher Labs! Combining Scandinavian heritage and cutting-edge cloud
+technologies, we deliver precision-crafted solutions with Amazon Web Services (AWS)
+and Infrastructure as Code (IaC). ⚡⚔️🌩️
 
 ## 🔰 Contributing
 
