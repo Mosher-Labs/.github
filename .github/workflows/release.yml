@@ -22,10 +22,10 @@ jobs:
           branch: main
 
       - name: Create Release
-        uses: ncipollo/release-action@v1.12.0
+        uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
-          draft: false
+          draft: true
           makeLatest: true
           name: ${{ steps.semver.outputs.next }}
           body: Changelog Contents
