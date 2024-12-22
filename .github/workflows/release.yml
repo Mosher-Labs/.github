@@ -31,7 +31,7 @@ jobs:
           commit: main
           draft: false
           makeLatest: true
+          generateReleaseNotes: true
           name: ${{ steps.semver.outputs.next }}
           tag: ${{ steps.semver.outputs.next }}
-          body: Changelog Contents
           token: ${{ github.token }}
