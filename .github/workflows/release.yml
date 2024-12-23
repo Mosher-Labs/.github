@@ -24,6 +24,7 @@ on:
   push:
     branches:
       - main
+  pull_request:
 
 permissions:
   contents: write
@@ -50,15 +51,19 @@ jobs:
         with:
           allowUpdates: ${{ github.event.inputs.enable_updates }}
           commit: main
-          draft: ${{ github.event.inputs.enable_draft }}
+          # draft: ${{ github.event.inputs.enable_draft }}
+          draft: true
           makeLatest: ${{ github.event.inputs.enable_latest }}
           generateReleaseNotes: ${{ github.event.inputs.enable_release_notes }}
           name: ${{ steps.semver.outputs.next }}
           tag: ${{ steps.semver.outputs.next }}
           token: ${{ github.token }}
 
+      - name: ll
+        run: ls -la
+
       - name: Heimdallr
-        if: github.event_name != 'workflow_call' && github.event_name != 'pull_request' && github.repository == 'Mosher-Labs/.github'
+        if: github.event_name != 'workflow_call' && github.repository == 'Mosher-Labs/.github'
         uses: ./../.github/workflows/heimdallr.yml
         with:
           slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just released version <https://github.com/${{ github.repository }}/releases/tag/${{ steps.semver.outputs.next }}|${{ steps.semver.outputs.next }}>."
