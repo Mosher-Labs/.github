@@ -6,9 +6,6 @@ on:
     branches:
       - main
 
-env:
-  DIFF: $(git diff --name-only 'origin/${{ github.base_ref }}' '${{ github.sha }}')
-
 jobs:
   pre-commit:
     permissions: read-all
@@ -21,6 +18,10 @@ jobs:
 
       - uses: actions/setup-python@v5
 
+      - name: Get changed files
+        id: file_changes
+        run: echo "diff=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
+
       - name: Cache pre-commit since we use pre-commit from container
         uses: actions/cache@v4
         with:
@@ -29,4 +30,4 @@ jobs:
 
       - uses: pre-commit/action@v3.0.1
         with:
-          extra_args: "--files $DIFF"
+          extra_args: "--files ${{ steps.file_changes.outputs.files }}"
