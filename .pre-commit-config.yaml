@@ -20,10 +20,6 @@ repos:
       - id: double-quote-string-fixer
       - id: end-of-file-fixer
       - id: trailing-whitespace
-  - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.0.0
-    hooks:
-      - id: conventional-pre-commit
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.35.1
     hooks:
@@ -40,3 +36,7 @@ repos:
     rev: 3.2.344
     hooks:
       - id: checkov_container
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.0.0
+    hooks:
+      - id: conventional-pre-commit
