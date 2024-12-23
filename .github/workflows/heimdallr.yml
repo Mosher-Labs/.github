@@ -14,7 +14,7 @@ on:
 jobs:
   heimdallr:
     runs-on: ubuntu-latest
-
+    permissions: read-all
     steps:
       - name: Send Slack Message
         uses: archive/github-actions-slack@v2.9.0
