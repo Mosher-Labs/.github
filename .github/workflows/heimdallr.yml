@@ -14,6 +14,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: test message
+        run: echo "${{ github.event.inputs.slack_message }}"
+
       - name: Send Slack Message
         uses: archive/github-actions-slack@v2.9.0
         id: send-message
@@ -22,6 +25,7 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
           slack-channel: ${{ secrets.SLACK_PLATFORM_NOTIFICATIONS_CHANNEL_ID }}
           slack-optional-blocks: "${{ github.event.inputs.slack_message }}"
+          slack-optional-icon_emoji: ":axe:"
 
       - name: Send Slack Message Result
         run: echo "Data - ${{ steps.send-message.outputs.slack-result }}"
