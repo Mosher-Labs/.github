@@ -1,6 +1,23 @@
 ---
 on:
   workflow_call:
+    inputs:
+      enable_draft:
+        required: false
+        type: boolean
+        default: false
+      enable_latest:
+        required: false
+        type: boolean
+        default: true
+      enable_release_notes:
+        required: false
+        type: boolean
+        default: true
+      enable_updates:
+        required: false
+        type: boolean
+        default: true
   push:
     branches:
       - main
@@ -25,11 +42,11 @@ jobs:
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          allowUpdates: true
+          allowUpdates: ${{ github.event.inputs.enable_updates }}
           commit: main
-          draft: false
-          makeLatest: true
-          generateReleaseNotes: true
+          draft: ${{ github.event.inputs.enable_draft }}
+          makeLatest: ${{ github.event.inputs.enable_latest }}
+          generateReleaseNotes: ${{ github.event.inputs.enable_release_notes }}
           name: ${{ steps.semver.outputs.next }}
           tag: ${{ steps.semver.outputs.next }}
           token: ${{ github.token }}
