@@ -1,15 +1,21 @@
 ---
 on:
   workflow_call:
+    outputs:
+      changed_files:
+        value: ${{ jobs.pre-commit.outputs.changed_files }}
   pull_request:
   push:
     branches:
       - main
 
+permissions: read-all
+
 jobs:
   pre-commit:
-    permissions: read-all
     runs-on: ubuntu-latest
+    outputs:
+      changed_files: ${{ steps.file_changes.outputs.files }}
     steps:
       - uses: actions/checkout@v4
         with:

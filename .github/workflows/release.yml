@@ -18,15 +18,21 @@ on:
         required: false
         type: boolean
         default: true
+    outputs:
+      next_version:
+        value: ${{ jobs.release.outputs.next_version }}
   push:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   release:
-    permissions:
-      contents: write
     runs-on: ubuntu-latest
+    outputs:
+      next_version: ${{ steps.semver.outputs.next }}
 
     steps:
       - name: Checkout Code
