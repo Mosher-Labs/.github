@@ -25,12 +25,11 @@ on:
     branches:
       - main
 
-permissions:
-  contents: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       next_version: ${{ steps.semver.outputs.next }}
 
