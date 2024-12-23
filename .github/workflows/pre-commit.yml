@@ -9,9 +9,10 @@ on:
     branches:
       - main
 
+permissions: read-all
+
 jobs:
   pre-commit:
-    permissions: read-all
     runs-on: ubuntu-latest
     outputs:
       changed_files: ${{ steps.file_changes.outputs.files }}

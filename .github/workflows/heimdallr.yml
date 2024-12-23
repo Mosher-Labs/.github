@@ -2,7 +2,7 @@
 on:
   workflow_call:
     inputs:
-      message:
+      slack_message:
         required: false
         type: string
         default: "Default slack message."
@@ -21,7 +21,7 @@ jobs:
           slack-function: send-message
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
           slack-channel: ${{ secrets.SLACK_PLATFORM_NOTIFICATIONS_CHANNEL_ID }}
-          slack-text: ${{ inputs.message }}
+          slack-text: ${{ github.event.inputs.slack_message }}
 
       - name: Send Slack Message Result
         run: echo "Data - ${{ steps.send-message.outputs.slack-result }}"
