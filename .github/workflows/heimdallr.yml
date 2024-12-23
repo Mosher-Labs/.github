@@ -6,6 +6,10 @@ on:
         required: false
         type: string
         default: "Default slack message."
+      enable_unfurl:
+        required: false
+        type: boolean
+        default: false
 
 permissions: read-all
 
@@ -22,3 +26,4 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
           slack-channel: ${{ secrets.SLACK_PLATFORM_NOTIFICATIONS_CHANNEL_ID }}
           slack-text: ${{ inputs.slack_message }}
+          slack-optional-unfurl_links: ${{ inputs.enable_unfurl }}
