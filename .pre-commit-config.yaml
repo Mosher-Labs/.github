@@ -1,4 +1,8 @@
 ---
+default_install_hook_types:
+  - pre-commit
+  - commit-msg
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -20,7 +24,6 @@ repos:
     rev: v4.0.0
     hooks:
       - id: conventional-pre-commit
-        stages: [commit-msg]
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.35.1
     hooks:
