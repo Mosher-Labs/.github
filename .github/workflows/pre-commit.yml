@@ -7,7 +7,7 @@ on:
       - main
 
 env:
-  DIFF: $(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }})
+  DIFF: $(git diff --name-only 'origin/${{ github.base_ref }}' '${{ github.sha }}')
 
 jobs:
   pre-commit:
