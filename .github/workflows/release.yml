@@ -63,6 +63,7 @@ jobs:
 
   heimdallr:
     if: github.event_name != 'workflow_call' && github.repository == 'Mosher-Labs/.github'
+    needs: release
     uses: ./.github/workflows/heimdallr.yml
     permissions: read-all
     secrets: inherit
