@@ -17,7 +17,6 @@ jobs:
       - name: Send Slack Message
         uses: archive/github-actions-slack@v2.9.0
         id: send-message
-
         with:
           slack-function: send-message
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
