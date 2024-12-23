@@ -18,13 +18,12 @@ on:
         required: false
         type: boolean
         default: true
-    # outputs:
-    #   next_version:
-    #     value: ${{ jobs.release.outputs.next_version }}
+    outputs:
+      next_version:
+        value: ${{ jobs.release.outputs.next_version }}
   push:
     branches:
       - main
-  pull_request:
 
 permissions:
   contents: write
@@ -32,41 +31,37 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    # outputs:
-    #   next_version: ${{ steps.semver.outputs.next }}
+    outputs:
+      next_version: ${{ steps.semver.outputs.next }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # - name: Get Next Version
-      #   id: semver
-      #   uses: ietf-tools/semver-action@v1
-      #   with:
-      #     token: ${{ github.token }}
-      #     branch: main
+      - name: Get Next Version
+        id: semver
+        uses: ietf-tools/semver-action@v1
+        with:
+          token: ${{ github.token }}
+          branch: main
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: ${{ github.event.inputs.enable_updates }}
           commit: main
-          # draft: ${{ github.event.inputs.enable_draft }}
-          draft: true
+          draft: ${{ github.event.inputs.enable_draft }}
           makeLatest: ${{ github.event.inputs.enable_latest }}
           generateReleaseNotes: ${{ github.event.inputs.enable_release_notes }}
-          # name: ${{ steps.semver.outputs.next }}
-          name: v0.6.4
-          # tag: ${{ steps.semver.outputs.next }}
-          tag: v0.6.4
+          name: ${{ steps.semver.outputs.next }}
+          tag: ${{ steps.semver.outputs.next }}
           token: ${{ github.token }}
 
   heimdallr:
-    if: github.event_name != 'workflow_call' && github.repository == 'Mosher-Labs/.github'
+    if: github.event_name != 'workflow_call' && github.event_name != 'pull_request' && github.repository == 'Mosher-Labs/.github'
     needs: release
     uses: ./.github/workflows/heimdallr.yml
     permissions: read-all
     secrets: inherit
     with:
-      # slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just released version <https://github.com/${{ github.repository }}/releases/tag/${{ steps.semver.outputs.next }}|${{ steps.semver.outputs.next }}>."
-      slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just released version <https://github.com/${{ github.repository }}/releases/tag/v0.6.4|v0.6.4>."
+      slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just released version <https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.next_version }}|${{ needs.release.outputs.next_version }}>."
