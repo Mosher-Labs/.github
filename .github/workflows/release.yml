@@ -56,11 +56,12 @@ jobs:
           tag: ${{ steps.semver.outputs.next }}
           token: ${{ github.token }}
 
-  heimdallr:
-    if: github.event_name != 'workflow_call' && github.event_name != 'pull_request' && github.repository == 'Mosher-Labs/.github'
-    needs: release
-    uses: ./.github/workflows/heimdallr.yml
-    permissions: read-all
-    secrets: inherit
-    with:
-      slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just released version <https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.next_version }}|${{ needs.release.outputs.next_version }}>."
+  # TODO: Renable this and figure out the weird nested permission issues
+  # heimdallr:
+  #   if: github.event_name != 'workflow_call' && github.event_name != 'pull_request' && github.repository == 'Mosher-Labs/.github'
+  #   needs: release
+  #   uses: ./.github/workflows/heimdallr.yml
+  #   permissions: read-all
+  #   secrets: inherit
+  #   with:
+  #     slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just released version <https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.next_version }}|${{ needs.release.outputs.next_version }}>."
