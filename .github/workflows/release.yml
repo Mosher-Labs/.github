@@ -21,7 +21,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
 
 jobs:
   release:
@@ -40,16 +39,12 @@ jobs:
           token: ${{ github.token }}
           branch: main
 
-      - name: Determine Draft Mode
-        id: draft_mode
-        run: if [ ${{ github.event_name }} == 'pull_request' ]; then echo "draft_mode='true'"; else echo "draft_mode='false'"; fi >> "$GITHUB_OUTPUT"
-
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: ${{ github.event.inputs.enable_updates }}
           commit: main
-          draft: ${{ steps.draft_mode.outputs.draft_mode }}
+          draft: ${{ github.event.inputs.enable_draft }}
           makeLatest: ${{ github.event.inputs.enable_latest }}
           generateReleaseNotes: ${{ github.event.inputs.enable_release_notes }}
           name: ${{ steps.semver.outputs.next }}
