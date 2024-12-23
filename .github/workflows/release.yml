@@ -59,6 +59,6 @@ jobs:
 
       - name: Heimdallr
         if: github.event_name != 'workflow_call' && github.event_name != 'pull_request' && github.repository == 'Mosher-Labs/.github'
-        uses: ./workflows/heimdallr.yml
+        uses: ./../workflows/heimdallr.yml
         with:
           slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just released version <https://github.com/${{ github.repository }}/releases/tag/${{ steps.semver.outputs.next }}|${{ steps.semver.outputs.next }}>."
