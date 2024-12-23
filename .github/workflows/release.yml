@@ -65,6 +65,7 @@ jobs:
     if: github.event_name != 'workflow_call' && github.repository == 'Mosher-Labs/.github'
     uses: ./.github/workflows/heimdallr.yml
     permissions: read-all
+    secrets: inherit
     with:
       # slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just released version <https://github.com/${{ github.repository }}/releases/tag/${{ steps.semver.outputs.next }}|${{ steps.semver.outputs.next }}>."
       slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just released version <https://github.com/${{ github.repository }}/releases/tag/v0.6.4|v0.6.4>."
