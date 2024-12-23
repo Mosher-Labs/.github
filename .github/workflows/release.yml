@@ -62,7 +62,7 @@ jobs:
           token: ${{ github.token }}
 
       - name: ll
-        run: ls -la ./.github
+        run: ls -la ./.github/workflows
 
       - name: Heimdallr
         if: github.event_name != 'workflow_call' && github.repository == 'Mosher-Labs/.github'
