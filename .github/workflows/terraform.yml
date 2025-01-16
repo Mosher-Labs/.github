@@ -1,9 +1,6 @@
 ---
 on:
   workflow_call:
-    secrets:
-      INFRACOST_API_KEY:
-        required: true
 
 jobs:
   terraform-plan-output:
