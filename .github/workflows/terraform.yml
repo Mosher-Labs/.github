@@ -34,7 +34,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment on PR
-        if: github.event_name == 'pull_request'
         uses: ./.github/workflows/heimdallr.yml
         # permissions: read-all
         # secrets: inherit
