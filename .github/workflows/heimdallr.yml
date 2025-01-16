@@ -1,18 +1,41 @@
 ---
+name: Heimdallr
+
 on:
   workflow_call:
     inputs:
-      slack_message:
+      comment_content:
         required: false
         type: string
-        default: "Default slack message."
+        default: Heimdallr has activated the bifrost.
+      comment_identifier:
+        required: false
+        type: string
+        default: <!-- bot-comment -->
+      comment_label:
+        required: false
+        type: string
+        default: Heimdallr has commented on this pull request.
+      enable_slack:
+        required: false
+        type: boolean
+        default: false
+      enable_comment_on_pr:
+        required: false
+        type: boolean
+        default: false
       enable_unfurl:
         required: false
         type: boolean
         default: false
+      slack_message:
+        required: false
+        type: string
+        default: "Default slack message."
 
 jobs:
-  heimdallr:
+  slack:
+    if: inputs.enable_slack == true
     runs-on: ubuntu-latest
     permissions: read-all
     steps:
@@ -25,3 +48,76 @@ jobs:
           slack-channel: ${{ secrets.SLACK_PLATFORM_NOTIFICATIONS_CHANNEL_ID }}
           slack-text: ${{ inputs.slack_message }}
           slack-optional-unfurl_links: ${{ inputs.enable_unfurl }}
+
+  pr_comment:
+    if: inputs.enable_comment_on_pr == true
+    runs-on: ubuntu-latest
+    permissions: read-all
+    steps:
+      - name: Comment on PR
+        id: comment-on-pr
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            function getPR(response,context) {
+              if ( context.eventName === 'pull_request' ) {
+                console.log('Event type was PR, setting PR number.');
+                return context.payload.pull_request.number;
+              } else if ( response.data.length !== 0 ) {
+                console.log('Event type was push, setting PR number.');
+                return response.data[0].number;
+              } else {
+                console.log('No PR found');
+                return 'No PR found';
+              }
+            }
+            response = await github.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
+                owner: context.payload.organization.login,
+                repo: context.payload.repository.name,
+                commit_sha: context.sha,
+                headers: {
+                  'X-GitHub-Api-Version': '2022-11-28'
+                }
+            });
+            pr_number = getPR(response, context);
+            if (pr_number === 'No PR found') {
+              process.exit(0);
+            }
+            const fs = require('fs');
+            const content_file = `${{ inputs.comment_content }}`;
+            const read_file = fs.readFileSync(content_file, 'utf8')
+            const isTooLong = read_file.length > 65000;
+            const formatted_content = isTooLong ? read_file.toString().substring(0, 65000) : read_file;
+
+            const output = `
+            ${{ inputs.comment_identifier }}
+            <details><summary>${{ inputs.comment_label }}</summary>
+
+            ${formatted_content}
+
+            </details>`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: pr_number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const existingComment = comments.find(comment => comment.body.includes(${{ inputs.comment_identifier }}));
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                comment_id: existingComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: pr_number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output,
+              });
+            }
