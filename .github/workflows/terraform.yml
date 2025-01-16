@@ -42,6 +42,9 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const github = require('@actions/github');
+            const context = github.context;
+
             const commentIdentifier = '<!-- terraform-comment -->';
             const commentBody = `
             ${commentIdentifier}
@@ -55,7 +58,7 @@ jobs:
 
             *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
 
-            const pullRequestNumber = github.context.payload.pull_request.number;
+            const pullRequestNumber = context.payload.pull_request.number;
 
             const { data: comments } = await github.rest.issues.listComments({
               issue_number: pullRequestNumber,
