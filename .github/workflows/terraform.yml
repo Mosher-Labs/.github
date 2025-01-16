@@ -4,7 +4,6 @@ on:
 
 jobs:
   terraform-plan-output:
-    if: github.event_name == 'pull_request'
     defaults:
       run:
         working-directory: ./
