@@ -28,7 +28,7 @@ jobs:
         id: plan
         run: |
           terraform plan -no-color > tfplan.txt
-          cat output.txt
+          cat tfplan.txt
           echo "plan_file=./tfplan.txt" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
