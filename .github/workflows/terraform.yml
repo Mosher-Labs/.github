@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -29,29 +29,80 @@ jobs:
         run: terraform plan -no-color
         continue-on-error: false
 
-      - name: Update Pull Request
+      - name: Comment PR
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_TOKEN }}
           script: |
-            const output = `#### Terraform Initialization 🤖\`${{ steps.init.outcome }}\`
-            <details><summary>Show Plan</summary>
+            function getPR(response,context) {
+              if ( context.eventName === 'pull_request' ) {
+                console.log('Event type was PR, setting PR number.');
+                return context.payload.pull_request.number;
+              } else if ( response.data.length !== 0 ) {
+                console.log('Event type was push, setting PR number.');
+                return response.data[0].number;
+              } else {
+                console.log('No PR found');
+                return 'No PR found';
+              }
+            }
+            response = await github.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
+                owner: context.payload.organization.login,
+                repo: context.payload.repository.name,
+                commit_sha: context.sha,
+                headers: {
+                  'X-GitHub-Api-Version': '2022-11-28'
+                }
+            });
+            pr_number = getPR(response, context);
+            if (pr_number === 'No PR found') {
+              process.exit(0);
+            }
+            const fs = require('fs');
+            const planFilePath = `${{ steps.plan.outputs.stdout }}`;
+            const tfplan = fs.readFileSync(planFilePath, 'utf8')
+            const isPlanTooLong = tfplan.length > 65000;
+            const plan = isPlanTooLong ? tfplan.toString().substring(0, 65000) : tfplan;
+
+            const output = `
+            <details><summary>Terraform plan</summary>
 
             \`\`\`\n
-            ${{ steps.plan.outputs.stdout }}
+            ${plan}
             \`\`\`
 
-            </details>
-
-            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            </details>`;
 
             github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
+                issue_number: pr_number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+            });
 
+      # - name: Update Pull Request
+      #   uses: actions/github-script@v7
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     script: |
+      #       const output = `#### Terraform Initialization 🤖\`${{ steps.init.outcome }}\`
+      #       <details><summary>Show Plan</summary>
+      #
+      #       \`\`\`\n
+      #       ${{ steps.plan.outputs.stdout }}
+      #       \`\`\`
+      #
+      #       </details>
+      #
+      #       *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+      #
+      #       github.rest.issues.createComment({
+      #         issue_number: context.issue.number,
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         body: output
+      #       })
+      #
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
