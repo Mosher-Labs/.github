@@ -1,6 +1,11 @@
 ---
 on:
   workflow_call:
+    inputs:
+      enable_apply:
+        required: false
+        type: boolean
+        default: false
     secrets:
       HEIMDALLR_TOKEN:
         required: true
@@ -35,7 +40,7 @@ jobs:
           cat tfplan.txt
           echo "plan_file=./tfplan.txt" >> $GITHUB_OUTPUT
         env:
-          GITHUB_TOKEN: ${{ secrets.HEIMDALLR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # TODO: Figure out why this is complaining about a checkout
       # - name: Comment on PR
@@ -119,3 +124,21 @@ jobs:
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
+
+      - name: Terraform Apply
+        id: apply
+        if: inputs.enable_apply
+        run: |
+          terraform apply -auto-approve >> tfapply.txt
+          cat tfapply.txt
+          echo "apply_file=./tfapply.txt" >> $GITHUB_OUTPUT
+
+      - name: Heimdallr
+        if: steps.apply.outcome != 'failure' && inputs.enable_apply
+        uses: "Mosher-Labs/.github/.github/workflows/heimdallr.yml@v0.9.0"
+        with:
+          enable_slack: true
+          slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just applied new Terraform. <https://github.com/${{ github.repository }}/actions/runs/${{github.run_id}}>"
+
+      - name: Terraform outputs
+        run: terraform output
