@@ -35,49 +35,29 @@ jobs:
           cat output.txt
           echo "plan_file=./output.txt" >> $GITHUB_OUTPUT
 
-      - name: Comment PR
+      - name: Update Pull Request
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            function getPR(response,context) {
-              if ( context.eventName === 'pull_request' ) {
-                console.log('Event type was PR, setting PR number.');
-                return context.payload.pull_request.number;
-              } else if ( response.data.length !== 0 ) {
-                console.log('Event type was push, setting PR number.');
-                return response.data[0].number;
-              } else {
-                console.log('No PR found');
-                return 'No PR found';
-              }
-            }
-            response = await github.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
-                owner: context.payload.organization.login,
-                repo: context.payload.repository.name,
-                commit_sha: context.sha,
-                headers: {
-                  'X-GitHub-Api-Version': '2022-11-28'
-                }
-            });
-            pr_number = getPR(response, context);
-            if (pr_number === 'No PR found') {
-              process.exit(0);
-            }
-            const fs = require('fs');
-            const planFilePath = `${{ steps.plan.outputs.plan_file }}`;
-            const tfplan = fs.readFileSync(planFilePath, 'utf8')
-            const isPlanTooLong = tfplan.length > 65000;
-            const plan = isPlanTooLong ? tfplan.toString().substring(0, 65000) : tfplan;
-
-            const output = `
-            <details><summary>Terraform plan</summary>
+            const commentIdentifier = '<!-- terraform-comment -->';
+            const commentBody = `
+            ${commentIdentifier}
+            <details><summary>Show Plan</summary>
 
             \`\`\`\n
-            ${plan}
+            ${{ steps.plan.outputs.plan_file }}
             \`\`\`
 
-            </details>`;
+            </details>
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
 
             const existingComment = comments.find(comment => comment.body.includes(commentIdentifier));
 
@@ -86,16 +66,78 @@ jobs:
                 comment_id: existingComment.id,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: output,
+                body: commentBody,
               });
             } else {
               await github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: output,
+                body: commentBody,
               });
             }
+
+      # - name: Comment PR
+      #   uses: actions/github-script@v7
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     script: |
+      #       function getPR(response,context) {
+      #         if ( context.eventName === 'pull_request' ) {
+      #           console.log('Event type was PR, setting PR number.');
+      #           return context.payload.pull_request.number;
+      #         } else if ( response.data.length !== 0 ) {
+      #           console.log('Event type was push, setting PR number.');
+      #           return response.data[0].number;
+      #         } else {
+      #           console.log('No PR found');
+      #           return 'No PR found';
+      #         }
+      #       }
+      #       response = await github.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
+      #           owner: context.payload.organization.login,
+      #           repo: context.payload.repository.name,
+      #           commit_sha: context.sha,
+      #           headers: {
+      #             'X-GitHub-Api-Version': '2022-11-28'
+      #           }
+      #       });
+      #       pr_number = getPR(response, context);
+      #       if (pr_number === 'No PR found') {
+      #         process.exit(0);
+      #       }
+      #       const fs = require('fs');
+      #       const planFilePath = `${{ steps.plan.outputs.plan_file }}`;
+      #       const tfplan = fs.readFileSync(planFilePath, 'utf8')
+      #       const isPlanTooLong = tfplan.length > 65000;
+      #       const plan = isPlanTooLong ? tfplan.toString().substring(0, 65000) : tfplan;
+      #
+      #       const output = `
+      #       <details><summary>Terraform plan</summary>
+      #
+      #       \`\`\`\n
+      #       ${plan}
+      #       \`\`\`
+      #
+      #       </details>`;
+      #
+      #       const existingComment = comments.find(comment => comment.body.includes(commentIdentifier));
+      #
+      #       if (existingComment) {
+      #         await github.rest.issues.updateComment({
+      #           comment_id: existingComment.id,
+      #           owner: context.repo.owner,
+      #           repo: context.repo.repo,
+      #           body: output,
+      #         });
+      #       } else {
+      #         await github.rest.issues.createComment({
+      #           issue_number: context.issue.number,
+      #           owner: context.repo.owner,
+      #           repo: context.repo.repo,
+      #           body: output,
+      #         });
+      #       }
 
       # - name: Update Pull Request
       #   uses: actions/github-script@v7
