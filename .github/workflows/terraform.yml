@@ -1,6 +1,9 @@
 ---
 on:
   workflow_call:
+    secrets:
+      HEIMDALLR_TOKEN:
+        required: true
 
 permissions:
   pull-requests: write
