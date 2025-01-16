@@ -86,14 +86,14 @@ jobs:
                 comment_id: existingComment.id,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: commentBody,
+                body: output,
               });
             } else {
               await github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: commentBody,
+                body: output,
               });
             }
 
