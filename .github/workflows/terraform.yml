@@ -1,61 +1,52 @@
 ---
-name: Heimdallr
-
 on:
   workflow_call:
-    inputs:
-      comment_content:
-        required: false
-        type: string
-        default: Heimdallr has activated the bifrost.
-      comment_identifier:
-        required: false
-        type: string
-        default: <!-- bot-comment -->
-      comment_label:
-        required: false
-        type: string
-        default: Heimdallr has commented on this pull request.
-      enable_slack:
-        required: false
-        type: boolean
-        default: false
-      enable_comment_on_pr:
-        required: false
-        type: boolean
-        default: false
-      enable_unfurl:
-        required: false
-        type: boolean
-        default: false
-      slack_message:
-        required: false
-        type: string
-        default: "Default slack message."
+    secrets:
+      HEIMDALLR_TOKEN:
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
 
 jobs:
-  slack:
-    if: inputs.enable_slack == true
+  terraform:
+    name: Terraform
     runs-on: ubuntu-latest
-    permissions: read-all
     steps:
-      - name: Send Slack Message
-        uses: archive/github-actions-slack@v2.9.0
-        id: send-message
-        with:
-          slack-function: send-message
-          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
-          slack-channel: ${{ secrets.SLACK_PLATFORM_NOTIFICATIONS_CHANNEL_ID }}
-          slack-text: ${{ inputs.slack_message }}
-          slack-optional-unfurl_links: ${{ inputs.enable_unfurl }}
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-  pr_comment:
-    if: inputs.enable_comment_on_pr == true
-    runs-on: ubuntu-latest
-    permissions: read-all
-    steps:
-      - name: Comment on PR
-        id: comment-on-pr
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: true
+
+      - name: Terraform Init
+        id: init
+        run: |
+          terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan -no-color >> tfplan.txt
+          cat tfplan.txt
+          echo "plan_file=./tfplan.txt" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.HEIMDALLR_TOKEN }}
+
+      # TODO: Figure out why this is complaining about a checkout
+      # - name: Comment on PR
+      #   uses: ./.github/workflows/heimdallr.yml
+      #   with:
+      #     comment_content: \`\`\`\n${{ steps.plan.outputs.plan_file }}\`\`\`
+      #     comment_identifier: <!-- heimdallr_terraform_plan_comment -->
+      #     comment_label: Terraform Plan Output
+      #     enable_comment_on_pr: true
+
+      - name: Comment PR
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.HEIMDALLR_TOKEN }}
@@ -85,16 +76,19 @@ jobs:
               process.exit(0);
             }
             const fs = require('fs');
-            const content_file = `${{ inputs.comment_content }}`;
-            const read_file = fs.readFileSync(content_file, 'utf8')
-            const isTooLong = read_file.length > 65000;
-            const formatted_content = isTooLong ? read_file.toString().substring(0, 65000) : read_file;
+            const planFilePath = `${{ steps.plan.outputs.plan_file }}`;
+            const tfplan = fs.readFileSync(planFilePath, 'utf8')
+            const isPlanTooLong = tfplan.length > 65000;
+            const plan = isPlanTooLong ? tfplan.toString().substring(0, 65000) : tfplan;
+            const commentIdentifier = '<!-- heimdallr_terraform_plan_comment -->';
 
             const output = `
-            ${{ inputs.comment_identifier }}
-            <details><summary>${{ inputs.comment_label }}</summary>
+            ${commentIdentifier}
+            <details><summary>Terraform Plan Output</summary>
 
-            ${formatted_content}
+            \`\`\`\n
+            ${plan}
+            \`\`\`
 
             </details>`;
 
@@ -104,7 +98,7 @@ jobs:
               repo: context.repo.repo,
             });
 
-            const existingComment = comments.find(comment => comment.body.includes(${{ inputs.comment_identifier }}));
+            const existingComment = comments.find(comment => comment.body.includes(commentIdentifier));
 
             if (existingComment) {
               await github.rest.issues.updateComment({
@@ -121,3 +115,7 @@ jobs:
                 body: output,
               });
             }
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
