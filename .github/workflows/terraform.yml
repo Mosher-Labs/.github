@@ -55,8 +55,10 @@ jobs:
 
             *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
 
+            const pullRequestNumber = github.context.payload.pull_request.number;
+
             const { data: comments } = await github.rest.issues.listComments({
-              issue_number: context.payload.pull_request.number,
+              issue_number: pullRequestNumber,
               owner: context.repo.owner,
               repo: context.repo.repo,
             });
@@ -72,7 +74,7 @@ jobs:
               });
             } else {
               await github.rest.issues.createComment({
-                issue_number: context.payload.pull_request.number,
+                issue_number: pullRequestNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 body: commentBody,
