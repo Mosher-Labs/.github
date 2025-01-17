@@ -10,7 +10,6 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    permissions: read-all
     outputs:
       plan_file: ${{ steps.plan.outputs.plan_file }}
       apply_file: ${{ steps.plan.outputs.apply_file }}
