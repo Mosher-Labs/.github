@@ -49,7 +49,7 @@ jobs:
           slack-optional-unfurl_links: ${{ inputs.enable_unfurl }}
 
   pr_comment:
-    if: inputs.enable_comment_on_pr == true
+    # if: inputs.enable_comment_on_pr == true
     runs-on: ubuntu-latest
     permissions:
       contents: write
