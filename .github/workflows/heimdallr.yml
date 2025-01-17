@@ -37,7 +37,6 @@ jobs:
   slack:
     if: inputs.enable_slack == true
     runs-on: ubuntu-latest
-    permissions: read-all
     steps:
       - name: Send Slack Message
         uses: archive/github-actions-slack@v2.9.0
