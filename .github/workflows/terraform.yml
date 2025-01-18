@@ -40,7 +40,7 @@ jobs:
         run: |
           terraform plan >> tfplan.txt
           cat tfplan.txt
-          echo "plan_file=./tfplan.txt" >> $GITHUB_OUTPUT
+          echo "plan_file=$(cat ./tfplan.txt)" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -63,7 +63,7 @@ jobs:
         run: |
           terraform apply -auto-approve >> tfapply.txt
           cat tfapply.txt
-          echo "apply_file=./tfapply.txt" >> $GITHUB_OUTPUT
+          echo "apply_file=$(cat ./tfapply.txt)" >> $GITHUB_OUTPUT
 
       # TODO: Figure out why this isn't nesting
       # - name: Heimdallr
