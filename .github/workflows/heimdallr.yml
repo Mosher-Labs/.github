@@ -61,9 +61,12 @@ jobs:
         with:
           github-token: ${{ secrets.HEIMDALLR_TOKEN }}
           script: |
-            const commentContent = github.context.payload.inputs.comment_content;
-            const commentIdentifier = github.context.payload.inputs.comment_identifier;
-            const commentLabel = github.context.payload.inputs.comment_label;
+            const github = require('@actions/github');
+            const context = github.context;
+
+            const commentContent = context.payload.inputs.comment_content;
+            const commentIdentifier = context.payload.inputs.comment_identifier;
+            const commentLabel = context.payload.inputs.comment_label;
 
             async function getPR(response, context) {
               if (context.eventName === 'pull_request') {
