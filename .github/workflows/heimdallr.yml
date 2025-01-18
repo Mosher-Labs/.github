@@ -47,9 +47,8 @@ jobs:
           slack-channel: ${{ secrets.SLACK_PLATFORM_NOTIFICATIONS_CHANNEL_ID }}
           slack-text: ${{ inputs.slack_message }}
           slack-optional-unfurl_links: ${{ inputs.enable_unfurl }}
-
   pr_comment:
-    if: inputs.enable_comment_on_pr == true
+    if: ${{ inputs.enable_comment_on_pr == true }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -91,14 +90,14 @@ jobs:
               process.exit(0);
             }
 
-            const content_file = `${{ inputs.comment_content }}`;
+            const content_file = `${ context.payload.inputs.comment_content }`;
             const read_file = fs.readFileSync(content_file, 'utf8');
             const isTooLong = read_file.length > 65000;
             const formatted_content = isTooLong ? read_file.toString().substring(0, 65000) : read_file;
 
             const output = `
-            ${{ inputs.comment_identifier }}
-            <details><summary>${{ inputs.comment_label }}</summary>
+            ${ context.payload.inputs.comment_identifier }
+            <details><summary>${ context.payload.inputs.comment_label }</summary>
 
             ${formatted_content}
 
@@ -110,7 +109,7 @@ jobs:
               repo: context.repo.repo,
             });
 
-            const existingComment = comments.find(comment => comment.body.includes(${{ inputs.comment_identifier }}));
+            const existingComment = comments.find(comment => comment.body.includes(context.payload.inputs.comment_identifier));
 
             if (existingComment) {
               await github.rest.issues.updateComment({
