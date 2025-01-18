@@ -105,20 +105,20 @@ jobs:
               repo: context.repo.repo,
             });
 
-            const existingComment = comments.find(comment => comment.body.includes(${{ inputs.comment_identifier }}));
-
-            if (existingComment) {
-              await github.rest.issues.updateComment({
-                comment_id: existingComment.id,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: output,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                issue_number: pr_number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: output,
-              });
-            }
+            # const existingComment = comments.find(comment => comment.body.includes(${{ inputs.comment_identifier }}));
+            #
+            # if (existingComment) {
+            #   await github.rest.issues.updateComment({
+            #     comment_id: existingComment.id,
+            #     owner: context.repo.owner,
+            #     repo: context.repo.repo,
+            #     body: output,
+            #   });
+            # } else {
+            #   await github.rest.issues.createComment({
+            #     issue_number: pr_number,
+            #     owner: context.repo.owner,
+            #     repo: context.repo.repo,
+            #     body: output,
+            #   });
+            # }
