@@ -38,9 +38,9 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-          terraform plan >> tfplan.txt
+          terraform plan -no-color >> tfplan.txt
           cat tfplan.txt
-          echo "plan_file=$(cat ./tfplan.txt)" >> $GITHUB_OUTPUT
+          echo "plan=$(cat ./tfplan.txt)" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -61,9 +61,9 @@ jobs:
         id: apply
         if: inputs.enable_apply
         run: |
-          terraform apply -auto-approve >> tfapply.txt
+          terraform apply -no-color -auto-approve >> tfapply.txt
           cat tfapply.txt
-          echo "apply_file=$(cat ./tfapply.txt)" >> $GITHUB_OUTPUT
+          echo "apply=$(cat ./tfapply.txt)" >> $GITHUB_OUTPUT
 
       # TODO: Figure out why this isn't nesting
       # - name: Heimdallr
