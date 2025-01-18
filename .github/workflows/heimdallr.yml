@@ -61,7 +61,7 @@ jobs:
         with:
           github-token: ${{ secrets.HEIMDALLR_TOKEN }}
           script: |
-            document.write(context);
+            console.log(context);
             # const commentContent = context.payload.inputs.comment_content;
             # const commentIdentifier = context.payload.inputs.comment_identifier;
             # const commentLabel = context.payload.inputs.comment_label;
