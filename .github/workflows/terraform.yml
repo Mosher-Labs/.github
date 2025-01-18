@@ -6,6 +6,13 @@ on:
         required: false
         type: boolean
         default: false
+    outputs:
+      plan_file:
+        description: The plan file to output.
+        value: ${{ jobs.terraform.outputs.plan_file }}
+      apply_file:
+        description: The apply file to output.
+        value: ${{ jobs.terraform.outputs.apply_file }}
 
 jobs:
   terraform:
