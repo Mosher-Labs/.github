@@ -35,7 +35,7 @@ on:
 
 jobs:
   slack:
-    if: inputs.enable_slack == true
+    if: ${{ inputs.enable_slack == true }}
     runs-on: ubuntu-latest
     steps:
       - name: Send Slack Message
@@ -47,6 +47,7 @@ jobs:
           slack-channel: ${{ secrets.SLACK_PLATFORM_NOTIFICATIONS_CHANNEL_ID }}
           slack-text: ${{ inputs.slack_message }}
           slack-optional-unfurl_links: ${{ inputs.enable_unfurl }}
+
   pr_comment:
     if: ${{ inputs.enable_comment_on_pr == true }}
     runs-on: ubuntu-latest
@@ -90,14 +91,14 @@ jobs:
               process.exit(0);
             }
 
-            const content_file = `${ context.payload.inputs.comment_content }`;
+            const content_file = context.payload.inputs.comment_content;
             const read_file = fs.readFileSync(content_file, 'utf8');
             const isTooLong = read_file.length > 65000;
             const formatted_content = isTooLong ? read_file.toString().substring(0, 65000) : read_file;
 
             const output = `
-            ${ context.payload.inputs.comment_identifier }
-            <details><summary>${ context.payload.inputs.comment_label }</summary>
+            ${context.payload.inputs.comment_identifier}
+            <details><summary>${context.payload.inputs.comment_label}</summary>
 
             ${formatted_content}
 
