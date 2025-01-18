@@ -105,7 +105,7 @@ jobs:
               repo: context.repo.repo,
             });
 
-            const existingComment = comments.find(comment => comment.body.includes(${inputs.comment_identifier}));
+            const existingComment = comments.find(comment => comment.body.includes(inputs.comment_identifier));
 
             if (existingComment) {
               await github.rest.issues.updateComment({
