@@ -61,11 +61,15 @@ jobs:
         with:
           github-token: ${{ secrets.HEIMDALLR_TOKEN }}
           script: |
-            async function getPR(response,context) {
-              if ( context.eventName === 'pull_request' ) {
+            const commentContent = `{{ inputs.comment_content }}`;
+            const commentIdentifier = `{{ inputs.comment_identifier }}`;
+            const commentLabel = `{{ inputs.comment_label }}`;
+
+            async function getPR(response, context) {
+              if (context.eventName === 'pull_request') {
                 console.log('Event type was PR, setting PR number.');
                 return context.payload.pull_request.number;
-              } else if ( response.data.length !== 0 ) {
+              } else if (response.data.length !== 0) {
                 console.log('Event type was push, setting PR number.');
                 return response.data[0].number;
               } else {
@@ -86,14 +90,14 @@ jobs:
               process.exit(0);
             }
             const fs = require('fs');
-            const content_file = `${inputs.comment_content}`;
-            const read_file = fs.readFileSync(content_file, 'utf8')
+            const content_file = commentContent;
+            const read_file = fs.readFileSync(content_file, 'utf8');
             const isTooLong = read_file.length > 65000;
             const formatted_content = isTooLong ? read_file.toString().substring(0, 65000) : read_file;
 
             const output = `
-            ${inputs.comment_identifier}
-            <details><summary>${inputs.comment_label}</summary>
+            ${commentIdentifier}
+            <details><summary>${commentLabel}</summary>
 
             ${formatted_content}
 
@@ -105,7 +109,7 @@ jobs:
               repo: context.repo.repo,
             });
 
-            const existingComment = comments.find(comment => comment.body.includes(inputs.comment_identifier));
+            const existingComment = comments.find(comment => comment.body.includes(commentIdentifier));
 
             if (existingComment) {
               await github.rest.issues.updateComment({
@@ -121,4 +125,3 @@ jobs:
                 repo: context.repo.repo,
                 body: output,
               });
-            }
