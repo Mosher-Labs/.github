@@ -91,7 +91,7 @@ jobs:
               process.exit(0);
             }
 
-            const content_file = context.payload.inputs.comment_content;
+            const content_file = ${{ inputs.comment_content }};
             const read_file = fs.readFileSync(content_file, 'utf8');
             const isTooLong = read_file.length > 65000;
             const formatted_content = isTooLong ? read_file.toString().substring(0, 65000) : read_file;
