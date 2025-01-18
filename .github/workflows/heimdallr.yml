@@ -99,11 +99,11 @@ jobs:
 
             </details>`;
 
-            const { data: comments } = await github.rest.issues.listComments({
-              issue_number: pr_number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
+            # const { data: comments } = await github.rest.issues.listComments({
+            #   issue_number: pr_number,
+            #   owner: context.repo.owner,
+            #   repo: context.repo.repo,
+            # });
 
             # const existingComment = comments.find(comment => comment.body.includes(${{ inputs.comment_identifier }}));
             #
