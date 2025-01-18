@@ -61,7 +61,7 @@ jobs:
         with:
           github-token: ${{ secrets.HEIMDALLR_TOKEN }}
           script: |
-            function getPR(response,context) {
+            async function getPR(response,context) {
               if ( context.eventName === 'pull_request' ) {
                 console.log('Event type was PR, setting PR number.');
                 return context.payload.pull_request.number;
@@ -81,7 +81,7 @@ jobs:
                   'X-GitHub-Api-Version': '2022-11-28'
                 }
             });
-            const pr_number = getPR(response, context);
+            const pr_number = await getPR(response, context);
             if (pr_number === 'No PR found') {
               process.exit(0);
             }
@@ -105,7 +105,7 @@ jobs:
               repo: context.repo.repo,
             });
 
-            const existingComment = comments.find(comment => comment.body.includes(inputs.comment_identifier));
+            const existingComment = comments.find(comment => comment.body.includes(${inputs.comment_identifier}));
 
             if (existingComment) {
               await github.rest.issues.updateComment({
