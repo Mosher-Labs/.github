@@ -73,31 +73,31 @@ jobs:
                 return 'No PR found';
               }
             }
-            response = await github.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
-                owner: context.payload.organization.login,
-                repo: context.payload.repository.name,
-                commit_sha: context.sha,
-                headers: {
-                  'X-GitHub-Api-Version': '2022-11-28'
-                }
-            });
-            pr_number = getPR(response, context);
-            if (pr_number === 'No PR found') {
-              process.exit(0);
-            }
-            const fs = require('fs');
-            const content_file = `${{ inputs.comment_content }}`;
-            const read_file = fs.readFileSync(content_file, 'utf8')
-            const isTooLong = read_file.length > 65000;
-            const formatted_content = isTooLong ? read_file.toString().substring(0, 65000) : read_file;
-
-            const output = `
-            ${{ inputs.comment_identifier }}
-            <details><summary>${{ inputs.comment_label }}</summary>
-
-            ${formatted_content}
-
-            </details>`;
+            # response = await github.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
+            #     owner: context.payload.organization.login,
+            #     repo: context.payload.repository.name,
+            #     commit_sha: context.sha,
+            #     headers: {
+            #       'X-GitHub-Api-Version': '2022-11-28'
+            #     }
+            # });
+            # pr_number = getPR(response, context);
+            # if (pr_number === 'No PR found') {
+            #   process.exit(0);
+            # }
+            # const fs = require('fs');
+            # const content_file = `${{ inputs.comment_content }}`;
+            # const read_file = fs.readFileSync(content_file, 'utf8')
+            # const isTooLong = read_file.length > 65000;
+            # const formatted_content = isTooLong ? read_file.toString().substring(0, 65000) : read_file;
+            #
+            # const output = `
+            # ${{ inputs.comment_identifier }}
+            # <details><summary>${{ inputs.comment_label }}</summary>
+            #
+            # ${formatted_content}
+            #
+            # </details>`;
 
             # const { data: comments } = await github.rest.issues.listComments({
             #   issue_number: pr_number,
