@@ -61,18 +61,19 @@ jobs:
         with:
           github-token: ${{ secrets.HEIMDALLR_TOKEN }}
           script: |
-            function getPR(response,context) {
-              if ( context.eventName === 'pull_request' ) {
-                console.log('Event type was PR, setting PR number.');
-                return context.payload.pull_request.number;
-              } else if ( response.data.length !== 0 ) {
-                console.log('Event type was push, setting PR number.');
-                return response.data[0].number;
-              } else {
-                console.log('No PR found');
-                return 'No PR found';
-              }
-            }
+            document.write('testing bam');
+            # function getPR(response,context) {
+            #   if ( context.eventName === 'pull_request' ) {
+            #     console.log('Event type was PR, setting PR number.');
+            #     return context.payload.pull_request.number;
+            #   } else if ( response.data.length !== 0 ) {
+            #     console.log('Event type was push, setting PR number.');
+            #     return response.data[0].number;
+            #   } else {
+            #     console.log('No PR found');
+            #     return 'No PR found';
+            #   }
+            # }
             # response = await github.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
             #     owner: context.payload.organization.login,
             #     repo: context.payload.repository.name,
