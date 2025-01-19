@@ -63,13 +63,13 @@ jobs:
       #       echo "plan=${plan}" >> $GITHUB_OUTPUT
 
       # TODO: Figure out why this isn't nesting
-      # - name: Comment on PR
-      #   uses: ./.github/workflows/heimdallr.yml
-      #   with:
-      #     comment_content: \`\`\`\n${{ steps.plan.outputs.plan_file }}\`\`\`
-      #     comment_identifier: <!-- heimdallr_terraform_plan_comment -->
-      #     comment_label: Terraform Plan Output
-      #     enable_comment_on_pr: true
+      - name: Comment on PR
+        uses: ./.github/workflows/heimdallr.yml
+        with:
+          comment_content: \`\`\`\n${{ steps.plan.outputs.plan_file }}\`\`\`
+          comment_identifier: <!-- heimdallr_terraform_plan_comment -->
+          comment_label: Terraform Plan Output
+          enable_comment_on_pr: true
 
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
