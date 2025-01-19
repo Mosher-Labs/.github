@@ -55,7 +55,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const planFilePath = `${{ steps.plan.outputs.plan_file }}`;
+            const planFilePath = './tfplan.txt';
             const tfplan = fs.readFileSync(planFilePath, 'utf8')
             const isPlanTooLong = tfplan.length > 65000;
             const plan = isPlanTooLong ? tfplan.toString().substring(0, 65000) : tfplan;
