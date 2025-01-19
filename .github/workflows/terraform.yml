@@ -10,9 +10,9 @@ on:
       plan_file:
         description: The plan file to output.
         value: ${{ jobs.terraform.outputs.plan_file }}
-      plan:
-        description: The plan to output.
-        value: ${{ jobs.terraform.outputs.plan }}
+      # plan:
+      #   description: The plan to output.
+      #   value: ${{ jobs.terraform.outputs.plan }}
       apply_file:
         description: The apply file to output.
         value: ${{ jobs.terraform.outputs.apply_file }}
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       plan_file: ${{ steps.plan.outputs.plan_file }}
-      plan: ${{ steps.read-plan-file.outputs.plan }}
+      # plan: ${{ steps.read-plan-file.outputs.plan }}
       apply_file: ${{ steps.plan.outputs.apply_file }}
 
     steps:
@@ -48,18 +48,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Read plan file
-        id: read-plan-file
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const planFilePath = `${{ steps.plan.outputs.plan_file }}`;
-            const tfplan = fs.readFileSync(planFilePath, 'utf8')
-            const isPlanTooLong = tfplan.length > 65000;
-            const plan = isPla:working_dir: dirnTooLong ? tfplan.toString().substring(0, 65000) : tfplan;
-            echo "plan=${plan}" >> $GITHUB_OUTPUT
+      # - name: Read plan file
+      #   id: read-plan-file
+      #   uses: actions/github-script@v7
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     script: |
+      #       const fs = require('fs');
+      #       const planFilePath = `${{ steps.plan.outputs.plan_file }}`;
+      #       const tfplan = fs.readFileSync(planFilePath, 'utf8')
+      #       const isPlanTooLong = tfplan.length > 65000;
+      #       const plan = isPla:working_dir: dirnTooLong ? tfplan.toString().substring(0, 65000) : tfplan;
+      #       echo "plan=${plan}" >> $GITHUB_OUTPUT
 
       # TODO: Figure out why this isn't nesting
       # - name: Comment on PR
