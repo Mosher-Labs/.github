@@ -120,7 +120,7 @@ jobs:
 
       - name: Terraform Apply
         id: apply
-        if: inputs.enable_apply && github.event.pull_request.merged
+        if: inputs.enable_apply
         run: |
           terraform apply -no-color -auto-approve >> tfapply.txt
           cat tfapply.txt
@@ -135,7 +135,7 @@ jobs:
       #     slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just applied new Terraform. <https://github.com/${{ github.repository }}/actions/runs/${{github.run_id}}>"
       #
       - name: Send Slack Message
-        if: steps.apply.outcome != 'failure' && inputs.enable_apply && github.event.pull_request.merged
+        if: steps.apply.outcome != 'failure' && inputs.enable_apply
         uses: archive/github-actions-slack@v2.9.0
         id: send-message
         with:
