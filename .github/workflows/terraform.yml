@@ -87,9 +87,11 @@ jobs:
             const output = `
             ${commentIdentifier}
             <details><summary>Terraform Plan Output</summary>
+
             \`\`\`\n
             ${plan}
             \`\`\`
+
             </details>`;
             const { data: comments } = await github.rest.issues.listComments({
               issue_number: pr_number,
