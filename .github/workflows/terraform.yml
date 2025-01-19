@@ -38,6 +38,7 @@ jobs:
           echo "plan_file=./tfplan.txt" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TF_API_TOKEN: ${{ secrets.BALDR_TFCLOUD_TOKEN }}
 
       # TODO: Figure out why this isn't nesting
       # - name: Comment on PR
@@ -125,6 +126,8 @@ jobs:
           terraform apply -no-color -auto-approve >> tfapply.txt
           cat tfapply.txt
           echo "apply_file=./tfapply.txt" >> $GITHUB_OUTPUT
+        env:
+          TF_API_TOKEN: ${{ secrets.BALDR_TFCLOUD_TOKEN }}
 
       # TODO: Figure out why this isn't nesting
       # - name: Heimdallr
