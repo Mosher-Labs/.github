@@ -65,7 +65,7 @@ jobs:
 
       # TODO: Figure out why this isn't nesting
       - name: Comment on PR
-        uses: ./.github/workflows/heimdallr.yml
+        uses: ./.github/workflows/heimdallr/action.yml
         with:
           comment_content: \`\`\`\n${{ steps.plan.outputs.plan_file }}\`\`\`
           comment_identifier: <!-- heimdallr_terraform_plan_comment -->
