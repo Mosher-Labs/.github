@@ -136,7 +136,7 @@ jobs:
       #
       - name: Send Slack Message
         if: steps.apply.outcome != 'failure' && inputs.enable_apply
-        uses: archive/github-actions-slack@v2.9.0
+        uses: archive/github-actions-slack@v2.10.1
         id: send-message
         with:
           slack-function: send-message
