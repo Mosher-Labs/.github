@@ -34,7 +34,24 @@ jobs:
       next_version: ${{ steps.semver.outputs.next }}
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Code (Full History for PRs)
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Merge PR Branch
+        if: github.event_name == 'pull_request'
+        env:
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git fetch origin "$PR_HEAD_REF"
+          git merge --no-ff --no-commit "origin/$PR_HEAD_REF"
+
+      - name: Checkout Code (Regular)
+        if: github.event_name != 'pull_request'
         uses: actions/checkout@v4
 
       - name: Get Next Version
@@ -42,7 +59,9 @@ jobs:
         uses: ietf-tools/semver-action@v1
         with:
           token: ${{ github.token }}
-          branch: main
+          branch: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
+          noVersionBumpBehavior: "silent"
+          skipInvalidTags: true
 
       - name: Create Release
         uses: ncipollo/release-action@v1
