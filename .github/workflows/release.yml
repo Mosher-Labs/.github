@@ -24,6 +24,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   release:
@@ -34,17 +37,32 @@ jobs:
       next_version: ${{ steps.semver.outputs.next }}
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Code (Full History for PRs)
+        if: github.event_name == 'pull_request'
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Checkout Code (Regular)
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Get Next Version
         id: semver
         uses: ietf-tools/semver-action@v1
         with:
           token: ${{ github.token }}
-          branch: main
+          branch: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+          noVersionBumpBehavior: "silent"
+          skipInvalidTags: true
 
       - name: Create Release
+        if: github.event_name != 'pull_request'
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: ${{ github.event.inputs.enable_updates }}
