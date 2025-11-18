@@ -76,7 +76,7 @@ jobs:
 
   heimdallr:
     needs: release
-    uses: Mosher-Labs/.github/.github/workflows/heimdallr.yml@v0.10.3
+    uses: Mosher-Labs/.github/.github/workflows/heimdallr.yml@main
     permissions:
       contents: write
       issues: write
