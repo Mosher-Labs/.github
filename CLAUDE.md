@@ -46,10 +46,13 @@ Handles semantic versioning and release creation using Conventional Commits.
 ```yaml
 jobs:
   release:
-    uses: "Mosher-Labs/.github/.github/workflows/release.yml@main"
+    uses: "Mosher-Labs/.github/.github/workflows/release.yml@v0.10.3"
     permissions:
       contents: write
 ```
+
+**Note:** Always pin to a specific version tag (e.g., `@v0.10.3`) instead of `@main`
+for stability and predictability. See Versioning Strategy below.
 
 **On PRs:** Calculates next version, Heimdallr comments with version preview
 
@@ -96,6 +99,49 @@ Terraform plan and apply workflow with PR commenting.
 
 **Note:** Currently uses inline script for PR commenting. Future enhancement
 is to use Heimdallr workflow once re-enabled.
+
+## Versioning Strategy
+
+**IMPORTANT:** All consuming repos should pin to **specific version tags**
+(e.g., `@v0.10.3`) instead of using `@main`.
+
+### Why Specific Versions
+
+- **Stability:** Changes to `@main` won't unexpectedly break consuming repos
+- **Predictability:** Repos control when they upgrade to new versions
+- **Testing:** New versions can be tested before rolling out
+- **Rollback:** Easy to revert to previous version if needed
+
+### When to Update Versions
+
+**In .github repo (after merge to main):**
+
+- A new version tag is automatically created based on Conventional Commits
+- Example: `feat:` commits create minor version (v0.10.0 → v0.11.0)
+- Example: `fix:` commits create patch version (v0.10.0 → v0.10.1)
+
+**In consuming repos:**
+
+- Manually update the version reference when ready to adopt new features
+- Test the new version in a feature branch first
+- Create a PR to update the version reference
+- Example:
+
+  ```yaml
+  # Update from
+  uses: "Mosher-Labs/.github/.github/workflows/release.yml@v0.10.3"
+  # To
+  uses: "Mosher-Labs/.github/.github/workflows/release.yml@v0.11.0"
+  ```
+
+### Version Update Process
+
+1. **Monitor .github releases:** Watch for new versions
+1. **Read release notes:** Understand what changed
+1. **Test in branch:** Create feature branch in consuming repo
+1. **Update version:** Change `@v0.10.3` to `@v0.11.0`
+1. **Verify workflow:** Check that PR workflow passes
+1. **Create PR:** Review and merge to update production
 
 ## Git Workflow
 
@@ -232,16 +278,18 @@ Configuration: `.markdownlint.yaml` (allows 2-space indent, 120 char lines)
 1. **Test workflow changes** with branch references before merging
 1. **Never skip testing** - "Option 2: Just merge it" is only for break-glass
 1. **Run pre-commit hooks** BEFORE committing (fix all errors!)
-1. **Consider impact** - Changes affect ALL consuming repos
-1. **Document breaking changes** - Update this file and notify consumers
-1. **Version tags** - Consider using version tags (v1.0.0) for stability
+1. **Consider impact** - Changes affect ALL consuming repos (even with version pinning)
+1. **Document breaking changes** - Update this file and create migration guide
+1. **After merge:** Update consuming repos to new version (create PRs for each)
+1. **Communicate:** Notify team about new versions and required updates
 
 ### Common Pitfalls
 
 - **Don't merge workflow changes without testing** - Use branch references
 - **Don't use `@latest` for actions** - Pin to specific versions
 - **Don't skip pre-commit hooks** - They catch workflow syntax errors
-- **Remember to change back to `@main`** before merging tested changes
+- **Don't forget to update consuming repos** - Version pins mean manual updates
+- **Don't skip release notes** - Consumers need to know what changed
 
 ## References
 
