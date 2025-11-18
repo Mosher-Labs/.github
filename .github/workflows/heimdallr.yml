@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send Slack Message
-        uses: archive/github-actions-slack@v2.9.0
+        uses: archive/github-actions-slack@v2.10.1
         id: send-message
         with:
           slack-function: send-message
