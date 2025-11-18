@@ -86,18 +86,22 @@ jobs:
               process.exit(0);
             }
             const fs = require('fs');
-            const planFilePath = `${{ inputs.comment_content }}`;
-            const tfplan = fs.readFileSync(planFilePath, 'utf8')
-            const isPlanTooLong = tfplan.length > 65000;
-            const plan = isPlanTooLong ? tfplan.toString().substring(0, 65000) : tfplan;
-            const commentIdentifier = '<!-- heimdallr_terraform_plan_comment -->';
-            const output = `
-            ${commentIdentifier}
-            <details><summary>Terraform Plan Output</summary>
-            \`\`\`\n
-            ${plan}
-            \`\`\`
-            </details>`;
+            const commentInput = `${{ inputs.comment_content }}`;
+            const commentIdentifier = `${{ inputs.comment_identifier }}`;
+
+            // Auto-detect if input is a file path or direct content
+            let content;
+            if (fs.existsSync(commentInput)) {
+              console.log('Reading comment content from file:', commentInput);
+              const fileContent = fs.readFileSync(commentInput, 'utf8');
+              const isTooLong = fileContent.length > 65000;
+              content = isTooLong ? fileContent.substring(0, 65000) : fileContent;
+            } else {
+              console.log('Using comment content as direct string');
+              content = commentInput;
+            }
+
+            const output = `${commentIdentifier}\n${content}`;
             const { data: comments } = await github.rest.issues.listComments({
               issue_number: pr_number,
               owner: context.repo.owner,

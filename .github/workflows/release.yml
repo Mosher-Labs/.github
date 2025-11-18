@@ -85,5 +85,6 @@ jobs:
     with:
       enable_slack: ${{ github.event_name != 'pull_request' }}
       enable_comment_on_pr: ${{ github.event_name == 'pull_request' }}
+      comment_identifier: "<!-- heimdallr_release_version_comment -->"
       slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just released version <https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.next_version }}|${{ needs.release.outputs.next_version }}>."
-      comment_content: "Next semantic version will be: **${{ needs.release.outputs.next_version }}**"
+      comment_content: "## :rocket: Next Release Version\n\nThe next semantic version for this PR will be: **${{ needs.release.outputs.next_version }}**"
