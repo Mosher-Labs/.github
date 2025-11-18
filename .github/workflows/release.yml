@@ -74,12 +74,17 @@ jobs:
           tag: ${{ steps.semver.outputs.next }}
           token: ${{ github.token }}
 
-  # TODO: Renable this and figure out the weird nested permission issues
-  # heimdallr:
-  #   if: github.event_name != 'workflow_call' && github.event_name != 'pull_request' && github.repository == 'Mosher-Labs/.github'
-  #   needs: release
-  #   uses: ./.github/workflows/heimdallr.yml
-  #   permissions: read-all
-  #   secrets: inherit
-  #   with:
-  #     slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just released version <https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.next_version }}|${{ needs.release.outputs.next_version }}>."
+  heimdallr:
+    needs: release
+    uses: Mosher-Labs/.github/.github/workflows/heimdallr.yml@v0.10.3
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    secrets: inherit
+    with:
+      enable_slack: ${{ github.event_name != 'pull_request' }}
+      enable_comment_on_pr: ${{ github.event_name == 'pull_request' }}
+      comment_identifier: "<!-- heimdallr_release_version_comment -->"
+      slack_message: "The project <https://github.com/${{ github.repository }}|${{ github.repository }}> just released version <https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.next_version }}|${{ needs.release.outputs.next_version }}>."
+      comment_content: "## :rocket: Next Release Version\n\nThe next semantic version for this PR will be: **${{ needs.release.outputs.next_version }}**"
