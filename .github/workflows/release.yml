@@ -60,16 +60,17 @@ jobs:
           branch: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
           noVersionBumpBehavior: "silent"
           skipInvalidTags: true
+          patchList: fix, bugfix, perf, refactor, test, tests, chore
 
       - name: Create Release
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.semver.outputs.next != ''
         uses: ncipollo/release-action@v1
         with:
-          allowUpdates: ${{ github.event.inputs.enable_updates }}
+          allowUpdates: ${{ inputs.enable_updates }}
           commit: main
-          draft: ${{ github.event.inputs.enable_draft }}
-          makeLatest: ${{ github.event.inputs.enable_latest }}
-          generateReleaseNotes: ${{ github.event.inputs.enable_release_notes }}
+          draft: ${{ inputs.enable_draft }}
+          makeLatest: ${{ inputs.enable_latest }}
+          generateReleaseNotes: ${{ inputs.enable_release_notes }}
           name: ${{ steps.semver.outputs.next }}
           tag: ${{ steps.semver.outputs.next }}
           token: ${{ github.token }}
