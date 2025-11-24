@@ -19,7 +19,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v10
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           stale-issue-message: "⚠️  This issue is marked as stale due to inactivity and will be closed in 7 days unless further action is taken. 👋"
