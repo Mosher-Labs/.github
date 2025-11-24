@@ -39,7 +39,7 @@ jobs:
     steps:
       - name: Checkout Code (Full History for PRs)
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -47,7 +47,7 @@ jobs:
 
       - name: Checkout Code (Regular)
         if: github.event_name != 'pull_request'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           fetch-tags: true
