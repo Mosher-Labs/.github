@@ -63,6 +63,12 @@ jobs:
       issues: write
       pull-requests: write
     steps:
+      - name: Debug secrets
+        run: |
+          echo "HEIMDALLR_TOKEN exists: ${{ secrets.HEIMDALLR_TOKEN != '' }}"
+          echo "HEIMDALLR_TOKEN length: ${#HEIMDALLR_TOKEN}"
+        env:
+          HEIMDALLR_TOKEN: ${{ secrets.HEIMDALLR_TOKEN }}
       - name: Comment on PR
         uses: actions/github-script@v8
         with:
