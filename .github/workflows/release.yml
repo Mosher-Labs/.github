@@ -18,6 +18,13 @@ on:
         required: false
         type: boolean
         default: true
+    secrets:
+      HEIMDALLR_TOKEN:
+        required: false
+      SLACK_BOT_USER_OAUTH_ACCESS_TOKEN:
+        required: false
+      SLACK_PLATFORM_NOTIFICATIONS_CHANNEL_ID:
+        required: false
     outputs:
       next_version:
         value: ${{ jobs.release.outputs.next_version }}
