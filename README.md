@@ -43,6 +43,54 @@ service account to post PR comments with proper attribution.
 - Shared across all Mosher-Labs repos via organization secret
 - Must be rotated every 90 days for security
 
+## 💬 Slack Integration Setup
+
+The Heimdallr workflow can send notifications to Slack when releases are created.
+This requires two organization secrets from your Slack workspace.
+
+### Getting Slack Credentials
+
+1. **Go to Slack App Settings**
+   - Visit the Slack app at <https://api.slack.com/apps>
+   - Select your app (or create a new one for Mosher Labs notifications)
+
+1. **Get the Bot User OAuth Token**
+   - Navigate to **OAuth & Permissions** in the sidebar
+   - Copy the **Bot User OAuth Token** (starts with `xoxb-`)
+   - This token allows the bot to post messages
+
+1. **Get the Channel ID**
+   - Open Slack and navigate to the channel where you want notifications
+   - Click the channel name at the top
+   - Scroll down and copy the **Channel ID** (looks like `C01234ABCDE`)
+
+### Setting the Secrets
+
+```bash
+# Set the Slack bot token
+echo "<xoxb-token>" | gh secret set SLACK_BOT_USER_OAUTH_ACCESS_TOKEN \
+  --org Mosher-Labs --visibility all
+
+# Set the Slack channel ID
+echo "<channel-id>" | gh secret set SLACK_PLATFORM_NOTIFICATIONS_CHANNEL_ID \
+  --org Mosher-Labs --visibility all
+```
+
+### Required Slack App Permissions
+
+Your Slack app needs these **Bot Token Scopes**:
+
+- `chat:write` - Post messages to channels
+- `chat:write.public` - Post to public channels without joining
+
+### Why These Secrets
+
+- `SLACK_BOT_USER_OAUTH_ACCESS_TOKEN` - Authenticates the bot to send messages
+- `SLACK_PLATFORM_NOTIFICATIONS_CHANNEL_ID` - Specifies which channel receives
+  notifications
+- Both are organization secrets shared across all Mosher Labs repos
+- Used by Heimdallr workflow when `enable_slack: true`
+
 ## 🔰 Contributing
 
 Upon first clone, install the pre-commit hooks.
