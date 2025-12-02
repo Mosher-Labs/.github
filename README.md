@@ -42,37 +42,6 @@ service account to post PR comments with proper attribution.
 - Shared across all appdiscr repos via organization secret
 - Must be rotated every 90 days for security
 
-## 🔐 HEIMDALLR_TOKEN Setup
-
-The workflows use a GitHub Personal Access Token (PAT) for the `mosherlabs-heimdallr`
-service account to post PR comments with proper attribution.
-
-### Creating/Rotating the Token
-
-1. **Login to GitHub** as `mosherlabs-heimdallr` (credentials in 1Password)
-1. Go to **Settings** → **Developer settings** → **Personal access tokens** →
-   **Tokens (classic)**
-1. Click **Generate new token (classic)**
-1. **Token settings:**
-   - Note: `HEIMDALLR_TOKEN for Mosher-Labs`
-   - Expiration: 90 days (recommended)
-   - Scopes: `repo` (Full control of private repositories)
-1. **Generate token** and copy it immediately
-1. **Add to Mosher-Labs org:**
-
-   ```bash
-   echo "<token>" | gh secret set HEIMDALLR_TOKEN \
-     --org Mosher-Labs --visibility all
-   ```
-
-1. **Store in 1Password** under mosherlabs-heimdallr account for future reference
-
-### Why This Token
-
-- Provides proper attribution (gravatar, username) on PR comments
-- Shared across all Mosher-Labs repos via organization secret
-- Must be rotated every 90 days for security
-
 ## 💬 Slack Integration Setup
 
 The Heimdallr workflow can send notifications to Slack when releases are created.
@@ -82,7 +51,7 @@ This requires two organization secrets from your Slack workspace.
 
 1. **Go to Slack App Settings**
    - Visit the Slack app at <https://api.slack.com/apps>
-   - Select your app (or create a new one for Mosher Labs notifications)
+   - Select your app (or create a new one for Discr notifications)
 
 1. **Get the Bot User OAuth Token**
    - Navigate to **OAuth & Permissions** in the sidebar
@@ -99,11 +68,11 @@ This requires two organization secrets from your Slack workspace.
 ```bash
 # Set the Slack bot token
 echo "<xoxb-token>" | gh secret set SLACK_BOT_USER_OAUTH_ACCESS_TOKEN \
-  --org Mosher-Labs --visibility all
+  --org appdiscr --visibility all
 
 # Set the Slack channel ID
 echo "<channel-id>" | gh secret set SLACK_PLATFORM_NOTIFICATIONS_CHANNEL_ID \
-  --org Mosher-Labs --visibility all
+  --org appdiscr --visibility all
 ```
 
 ### Required Slack App Permissions
@@ -118,7 +87,7 @@ Your Slack app needs these **Bot Token Scopes**:
 - `SLACK_BOT_USER_OAUTH_ACCESS_TOKEN` - Authenticates the bot to send messages
 - `SLACK_PLATFORM_NOTIFICATIONS_CHANNEL_ID` - Specifies which channel receives
   notifications
-- Both are organization secrets shared across all Mosher Labs repos
+- Both are organization secrets shared across all Discr repos
 - Used by Heimdallr workflow when `enable_slack: true`
 
 ## 🔰 Contributing
