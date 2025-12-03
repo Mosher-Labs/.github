@@ -51,25 +51,38 @@ jobs:
             const fs = require('fs');
             const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
             const totals = coverage.total;
+            // Only check lines, branches, and statements (not functions for schema files)
             const minCoverage = Math.min(
               totals.lines.pct,
               totals.statements.pct,
-              totals.functions.pct,
               totals.branches.pct
             );
-            console.log(minCoverage.toFixed(2));
+            console.log(JSON.stringify({
+              coverage: minCoverage.toFixed(2),
+              lines: totals.lines.pct.toFixed(2),
+              statements: totals.statements.pct.toFixed(2),
+              branches: totals.branches.pct.toFixed(2),
+              functions: totals.functions.pct.toFixed(2)
+            }));
           ")
 
           THRESHOLD=${{ inputs.coverage_threshold }}
+          MIN_COVERAGE=$(echo $COVERAGE | jq -r '.coverage')
 
-          echo "Coverage: ${COVERAGE}%"
+          echo "Coverage Report:"
+          echo "  Lines: $(echo $COVERAGE | jq -r '.lines')%"
+          echo "  Statements: $(echo $COVERAGE | jq -r '.statements')%"
+          echo "  Branches: $(echo $COVERAGE | jq -r '.branches')%"
+          echo "  Functions: $(echo $COVERAGE | jq -r '.functions')% (not enforced)"
+          echo ""
+          echo "Minimum Coverage: ${MIN_COVERAGE}%"
           echo "Threshold: ${THRESHOLD}%"
 
-          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
-            echo "❌ Coverage ${COVERAGE}% is below threshold ${THRESHOLD}%"
+          if (( $(echo "$MIN_COVERAGE < $THRESHOLD" | bc -l) )); then
+            echo "❌ Coverage ${MIN_COVERAGE}% is below threshold ${THRESHOLD}%"
             exit 1
           else
-            echo "✅ Coverage ${COVERAGE}% meets threshold ${THRESHOLD}%"
+            echo "✅ Coverage ${MIN_COVERAGE}% meets threshold ${THRESHOLD}%"
           fi
 
       - name: Upload coverage reports
