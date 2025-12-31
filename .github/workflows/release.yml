@@ -43,7 +43,7 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
 
       - name: Checkout Code (Regular)
         if: github.event_name != 'pull_request'
@@ -57,7 +57,7 @@ jobs:
         uses: ietf-tools/semver-action@v1
         with:
           token: ${{ github.token }}
-          branch: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+          branch: main
           noVersionBumpBehavior: "silent"
           noNewCommitBehavior: "silent"
           skipInvalidTags: true
