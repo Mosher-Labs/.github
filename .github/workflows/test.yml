@@ -1,0 +1,152 @@
+---
+name: Test
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        required: false
+        type: string
+        default: "22"
+        description: Node.js version to use
+      coverage_threshold:
+        required: false
+        type: number
+        default: 50
+        description: Minimum code coverage percentage (0-100)
+      working_directory:
+        required: false
+        type: string
+        default: "."
+        description: Working directory for the tests
+      test_command:
+        required: false
+        type: string
+        default: "npm run test:coverage"
+        description: Command to run tests with coverage
+    secrets:
+      HEIMDALLR_TOKEN:
+        required: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    outputs:
+      statements: ${{ steps.coverage.outputs.statements }}
+      branches: ${{ steps.coverage.outputs.branches }}
+      functions: ${{ steps.coverage.outputs.functions }}
+      lines: ${{ steps.coverage.outputs.lines }}
+      base_statements: ${{ steps.base-coverage.outputs.statements }}
+      base_branches: ${{ steps.base-coverage.outputs.branches }}
+      base_functions: ${{ steps.base-coverage.outputs.functions }}
+      base_lines: ${{ steps.base-coverage.outputs.lines }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: npm
+          cache-dependency-path: ${{ inputs.working_directory }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.working_directory }}
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: ${{ inputs.working_directory }}
+        run: ${{ inputs.test_command }}
+
+      - name: Get coverage values
+        id: coverage
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          STATEMENTS=$(jq '.total.statements.pct' coverage/coverage-summary.json)
+          BRANCHES=$(jq '.total.branches.pct' coverage/coverage-summary.json)
+          FUNCTIONS=$(jq '.total.functions.pct' coverage/coverage-summary.json)
+          LINES=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+          {
+            echo "statements=$STATEMENTS"
+            echo "branches=$BRANCHES"
+            echo "functions=$FUNCTIONS"
+            echo "lines=$LINES"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Restore main branch coverage from cache
+        if: github.event_name == 'pull_request'
+        id: cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ inputs.working_directory }}/base-coverage/coverage-summary.json
+          key: coverage-main-latest
+          restore-keys: |
+            coverage-main-
+
+      - name: Get base coverage values
+        id: base-coverage
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          if [ -f base-coverage/coverage-summary.json ]; then
+            STATEMENTS=$(jq '.total.statements.pct' base-coverage/coverage-summary.json)
+            BRANCHES=$(jq '.total.branches.pct' base-coverage/coverage-summary.json)
+            FUNCTIONS=$(jq '.total.functions.pct' base-coverage/coverage-summary.json)
+            LINES=$(jq '.total.lines.pct' base-coverage/coverage-summary.json)
+          else
+            STATEMENTS=0
+            BRANCHES=0
+            FUNCTIONS=0
+            LINES=0
+          fi
+          {
+            echo "statements=$STATEMENTS"
+            echo "branches=$BRANCHES"
+            echo "functions=$FUNCTIONS"
+            echo "lines=$LINES"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Prepare coverage for caching
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          mkdir -p base-coverage
+          cp coverage/coverage-summary.json base-coverage/coverage-summary.json
+
+      - name: Cache main branch coverage
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ inputs.working_directory }}/base-coverage/coverage-summary.json
+          key: coverage-main-${{ github.sha }}
+
+      - name: Update latest main coverage cache
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ inputs.working_directory }}/base-coverage/coverage-summary.json
+          key: coverage-main-latest
+
+  coverage-report:
+    name: Coverage Report
+    needs: test
+    if: github.event_name == 'pull_request'
+    uses: discrapp/.github/.github/workflows/coverage.yml@main
+    with:
+      coverage_threshold: ${{ inputs.coverage_threshold }}
+      pr_statements: ${{ needs.test.outputs.statements }}
+      pr_branches: ${{ needs.test.outputs.branches }}
+      pr_functions: ${{ needs.test.outputs.functions }}
+      pr_lines: ${{ needs.test.outputs.lines }}
+      base_statements: ${{ needs.test.outputs.base_statements }}
+      base_branches: ${{ needs.test.outputs.base_branches }}
+      base_functions: ${{ needs.test.outputs.base_functions }}
+      base_lines: ${{ needs.test.outputs.base_lines }}
+    secrets:
+      HEIMDALLR_TOKEN: ${{ secrets.HEIMDALLR_TOKEN }}

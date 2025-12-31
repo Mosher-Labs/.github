@@ -1,29 +1,34 @@
-# Mosher Labs .github - Project Memory
+# Discr .github - Project Memory
 
 This file contains persistent context for Claude Code sessions on this project.
 It will be automatically loaded at the start of every session.
 
 ## Project Overview
 
-This repository contains reusable GitHub Actions workflows for Mosher Labs projects.
+This repository contains reusable GitHub Actions workflows for Discr projects.
 It provides centralized CI/CD workflows that are consumed by other repositories
 via `workflow_call`.
 
 **Key Details:**
 
 - **Purpose:** Shared GitHub Actions workflows
-- **Consumers:** All Mosher Labs repositories
-- **Workflows:** Release, Terraform, Heimdallr (notifications)
+- **Consumers:** All Discr repositories (mobile, api, docs)
+- **Workflows:** Release, Pre-commit, Stale, Heimdallr (notifications)
 - **Pattern:** Reusable workflows with `workflow_call`
+- **Forked from:** Mosher-Labs/.github (sync manually as needed)
 
 ## Repository Structure
 
 ```text
 .github/
-├── .github/workflows/     # Shared workflows
-│   ├── release.yml        # Semantic versioning & releases
-│   ├── terraform.yml      # Terraform plan/apply
-│   └── heimdallr.yml      # Notifications (Slack/PR comments)
+├── .github/workflows/          # Shared workflows
+│   ├── coverage.yml            # Coverage reporting for PRs (uses heimdallr)
+│   ├── heimdallr.yml           # Notifications (Slack/PR comments)
+│   ├── pre-commit.yml          # Pre-commit hook validation
+│   ├── release.yml             # Semantic versioning & releases
+│   ├── stale.yml               # Stale issue/PR management
+│   ├── terraform.yml           # Terraform plan/apply
+│   └── test.yml                # Node.js test runner
 ├── .pre-commit-config.yaml
 └── CLAUDE.md
 ```
@@ -46,13 +51,16 @@ Handles semantic versioning and release creation using Conventional Commits.
 ```yaml
 jobs:
   release:
-    uses: "Mosher-Labs/.github/.github/workflows/release.yml@v0.10.3"
+    uses: "discrapp/.github/.github/workflows/release.yml@main"
+    secrets: inherit
     permissions:
       contents: write
+      issues: write
+      pull-requests: write
 ```
 
-**Note:** Always pin to a specific version tag (e.g., `@v0.10.3`) instead of `@main`
-for stability and predictability. See Versioning Strategy below.
+**Note:** Currently using `@main` for simplicity. Consider pinning to specific
+version tags in the future for stability.
 
 **On PRs:** Calculates next version, Heimdallr comments with version preview
 
@@ -175,7 +183,7 @@ If you modify `heimdallr.yml` and also update `release.yml` to use the new versi
 
    ```yaml
    heimdallr:
-     uses: Mosher-Labs/.github/.github/workflows/heimdallr.yml@fix-heimdallr
+     uses: discrapp/.github/.github/workflows/heimdallr.yml@fix-heimdallr
    ```
 
 1. Commit and push
@@ -184,7 +192,7 @@ If you modify `heimdallr.yml` and also update `release.yml` to use the new versi
 
    ```yaml
    heimdallr:
-     uses: Mosher-Labs/.github/.github/workflows/heimdallr.yml@main
+     uses: discrapp/.github/.github/workflows/heimdallr.yml@main
    ```
 
 1. Commit the change back to `@main` reference
@@ -232,17 +240,63 @@ pre-commit autoupdate           # Update hook versions
 
 ## Consuming Repositories
 
-The following repos use these shared workflows:
+The following Discr repos use these shared workflows:
 
-- ansible-node-setup
-- basic-repo-template
-- basic-ansible-template
-- helm-charts
-- basic-helm-charts-template
-- homelab-gitops
-- basic-terraform-infrastructure-template
+- **mobile** - React Native mobile app
+- **api** - Backend API services
+- **docs** - Documentation site
 
 ## Important Notes
+
+### CRITICAL: Always Use Reusable Workflows
+
+**MANDATORY:** When implementing any CI/CD functionality that will be used
+across multiple repositories (mobile, api, web, docs), you MUST create a
+reusable workflow in this `.github` repo first.
+
+**Do NOT:**
+
+- Implement the same workflow logic in multiple repos
+- Copy/paste workflow code between repos
+- Create repo-specific workflows for shared functionality
+
+**Do:**
+
+- Create a reusable workflow here with `workflow_call` trigger
+- Have consuming repos call the shared workflow
+- Pass repo-specific configuration via inputs
+
+**Example - Coverage Reporting:**
+
+```yaml
+# In .github repo: .github/workflows/coverage.yml
+on:
+  workflow_call:
+    inputs:
+      coverage_threshold:
+        type: number
+        default: 50
+
+# In consuming repo:
+jobs:
+  coverage:
+    uses: "discrapp/.github/.github/workflows/coverage.yml@main"
+    with:
+      coverage_threshold: 40
+      pr_statements: "75.5"
+      pr_branches: "60.0"
+      pr_functions: "80.0"
+      pr_lines: "75.0"
+    secrets:
+      HEIMDALLR_TOKEN: ${{ secrets.HEIMDALLR_TOKEN }}
+```
+
+**Why this matters:**
+
+- Single source of truth for workflow logic
+- Updates automatically propagate to all repos
+- No duplicate code to maintain
+- Consistent behavior across all projects
 
 ### Code Quality Standards
 
@@ -291,6 +345,31 @@ Configuration: `.markdownlint.yaml` (allows 2-space indent, 120 char lines)
 - **Don't forget to update consuming repos** - Version pins mean manual updates
 - **Don't skip release notes** - Consumers need to know what changed
 
+## Local Development - Analytics Blocking
+
+**IMPORTANT:** The home network Pi-hole blocks analytics domains to prevent
+skewing metrics with development traffic. If you're debugging issues with:
+
+- **Sentry errors not appearing** - Pi-hole blocks `o4510563703193600.ingest.us.sentry.io`
+- **Cloudflare Analytics not tracking** - Pi-hole blocks `cloudflareinsights.com`
+- **Segment events not sending** - Pi-hole blocks `api.segment.io`
+
+**To test analytics locally:**
+
+1. Temporarily disable Pi-hole blocking (Pi-hole admin → Disable → 5 minutes)
+2. Or use mobile data / a network without Pi-hole
+3. Or add the domains to Pi-hole's whitelist temporarily
+
+**Configuration location:** `Mosher-Labs/homelab-gitops` → `apps/pihole/application.yaml`
+
+**Blocked domains:**
+
+- `o4510563703193600.ingest.us.sentry.io` (Sentry)
+- `static.cloudflareinsights.com` (Cloudflare Analytics)
+- `cloudflareinsights.com` (Cloudflare Analytics)
+- `api.segment.io` (Segment)
+- `cdn.segment.com` (Segment)
+
 ## References
 
 - @README.md - Repository overview
@@ -299,7 +378,7 @@ Configuration: `.markdownlint.yaml` (allows 2-space indent, 120 char lines)
 
 ---
 
-**Last Updated:** 2025-11-18
+**Last Updated:** 2025-12-23
 
 This file should be updated whenever:
 
