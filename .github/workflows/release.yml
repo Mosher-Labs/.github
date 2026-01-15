@@ -61,7 +61,7 @@ jobs:
           noVersionBumpBehavior: "silent"
           noNewCommitBehavior: "silent"
           skipInvalidTags: true
-          patchList: fix, bugfix, perf, refactor, test, tests, chore
+          patchList: fix, bugfix, perf, refactor, test, tests, chore, ci
 
       - name: Create Release
         if: github.event_name != 'pull_request' && steps.semver.outputs.next != ''
@@ -78,12 +78,13 @@ jobs:
 
   heimdallr:
     needs: release
-    uses: Mosher-Labs/.github/.github/workflows/heimdallr.yml@main
+    uses: discrapp/.github/.github/workflows/heimdallr.yml@main
     permissions:
       contents: write
       issues: write
       pull-requests: write
-    secrets: inherit
+    secrets:
+      HEIMDALLR_TOKEN: ${{ secrets.HEIMDALLR_TOKEN }}
     with:
       enable_slack: ${{ github.event_name != 'pull_request' }}
       enable_comment_on_pr: ${{ github.event_name == 'pull_request' }}
