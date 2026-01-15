@@ -83,7 +83,8 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
-    secrets: inherit
+    secrets:
+      HEIMDALLR_TOKEN: ${{ secrets.HEIMDALLR_TOKEN }}
     with:
       enable_slack: ${{ github.event_name != 'pull_request' }}
       enable_comment_on_pr: ${{ github.event_name == 'pull_request' }}
