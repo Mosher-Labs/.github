@@ -18,7 +18,7 @@ jobs:
     outputs:
       changed_files: ${{ steps.file_changes.outputs.files }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -30,7 +30,7 @@ jobs:
         run: echo "files=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
 
       - name: Cache pre-commit since we use pre-commit from container
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-3|${{ hashFiles('.pre-commit-config.yaml') }}
