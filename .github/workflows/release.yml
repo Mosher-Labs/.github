@@ -39,7 +39,7 @@ jobs:
     steps:
       - name: Checkout Code (Full History for PRs)
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -47,14 +47,14 @@ jobs:
 
       - name: Checkout Code (Regular)
         if: github.event_name != 'pull_request'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           fetch-tags: true
 
       - name: Get Next Version
         id: semver
-        uses: ietf-tools/semver-action@v1
+        uses: ietf-tools/semver-action@c90370b2958652d71c06a3484129a4d423a6d8a8 # v1.11.0
         with:
           token: ${{ github.token }}
           branch: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
@@ -65,7 +65,7 @@ jobs:
 
       - name: Create Release
         if: github.event_name != 'pull_request' && steps.semver.outputs.next != ''
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
           allowUpdates: ${{ inputs.enable_updates }}
           commit: main
@@ -78,7 +78,7 @@ jobs:
 
   heimdallr:
     needs: release
-    uses: discrapp/.github/.github/workflows/heimdallr.yml@main
+    uses: discrapp/.github/.github/workflows/heimdallr.yml@edfc66c22a63bd737d185af2d7b547731a0082ae # main
     permissions:
       contents: write
       issues: write

@@ -48,10 +48,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ inputs.node_version }}
           cache: npm
@@ -83,7 +83,7 @@ jobs:
       - name: Restore main branch coverage from cache
         if: github.event_name == 'pull_request'
         id: cache-restore
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ inputs.working_directory }}/base-coverage/coverage-summary.json
           key: coverage-main-latest
@@ -121,14 +121,14 @@ jobs:
 
       - name: Cache main branch coverage
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ inputs.working_directory }}/base-coverage/coverage-summary.json
           key: coverage-main-${{ github.sha }}
 
       - name: Update latest main coverage cache
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ inputs.working_directory }}/base-coverage/coverage-summary.json
           key: coverage-main-latest
@@ -137,7 +137,7 @@ jobs:
     name: Coverage Report
     needs: test
     if: github.event_name == 'pull_request'
-    uses: discrapp/.github/.github/workflows/coverage.yml@main
+    uses: discrapp/.github/.github/workflows/coverage.yml@edfc66c22a63bd737d185af2d7b547731a0082ae # main
     with:
       coverage_threshold: ${{ inputs.coverage_threshold }}
       pr_statements: ${{ needs.test.outputs.statements }}

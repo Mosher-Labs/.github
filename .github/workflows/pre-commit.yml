@@ -18,12 +18,12 @@ jobs:
     outputs:
       changed_files: ${{ steps.file_changes.outputs.files }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
 
       # Check only the files changed by the PR or push. github.sha is the PR
       # merge commit, which checkout doesn't fetch, so use the event's SHAs.
@@ -45,11 +45,11 @@ jobs:
           fi
 
       - name: Cache pre-commit since we use pre-commit from container
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-3|${{ hashFiles('.pre-commit-config.yaml') }}
 
-      - uses: pre-commit/action@v3.0.1
+      - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
         with:
           extra_args: ${{ steps.file_changes.outputs.args }}
