@@ -25,9 +25,24 @@ jobs:
 
       - uses: actions/setup-python@v7
 
+      # Check only the files changed by the PR or push. github.sha is the PR
+      # merge commit, which checkout doesn't fetch, so use the event's SHAs.
+      # Fall back to all files when there is no usable base (new branch,
+      # force push).
       - name: Get changed files
         id: file_changes
-        run: echo "files=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -n "$BASE_SHA" && ! "$BASE_SHA" =~ ^0+$ ]] &&
+            git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+            files="$(git diff --name-only "$BASE_SHA...HEAD" | tr '\n' ' ')"
+            echo "files=$files" >> "$GITHUB_OUTPUT"
+            echo "args=--from-ref $BASE_SHA --to-ref HEAD" >> "$GITHUB_OUTPUT"
+          else
+            echo "files=$(git ls-files | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
+            echo "args=--all-files" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Cache pre-commit since we use pre-commit from container
         uses: actions/cache@v6
@@ -37,4 +52,4 @@ jobs:
 
       - uses: pre-commit/action@v3.0.1
         with:
-          extra_args: "--files ${{ steps.file_changes.outputs.files }}"
+          extra_args: ${{ steps.file_changes.outputs.args }}
