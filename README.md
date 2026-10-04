@@ -1,10 +1,16 @@
 # .github
 
-![GitHub branch status](https://img.shields.io/github/checks-status/discrapp/.github/main)
-![GitHub Issues](https://img.shields.io/github/issues/discrapp/.github)
-![GitHub last commit](https://img.shields.io/github/last-commit/discrapp/.github)
-![GitHub repo size](https://img.shields.io/github/repo-size/discrapp/.github)
-![GitHub License](https://img.shields.io/github/license/discrapp/.github)
+![GitHub branch status][b1]
+![GitHub Issues][b2]
+![GitHub last commit][b3]
+![GitHub repo size][b4]
+![GitHub License][b5]
+
+[b1]: https://img.shields.io/github/checks-status/discrapp/.github/main
+[b2]: https://img.shields.io/github/issues/discrapp/.github
+[b3]: https://img.shields.io/github/last-commit/discrapp/.github
+[b4]: https://img.shields.io/github/repo-size/discrapp/.github
+[b5]: https://img.shields.io/github/license/discrapp/.github
 
 🎯 **Discr** - Shared GitHub Actions workflows and organization configuration
 for the Discr project.
@@ -14,8 +20,9 @@ Discr repositories.
 
 ## 🔐 HEIMDALLR_TOKEN Setup
 
-The workflows use a GitHub Personal Access Token (PAT) for the `mosherlabs-heimdallr`
-service account to post PR comments with proper attribution.
+The workflows use a GitHub Personal Access Token (PAT) for the
+`mosherlabs-heimdallr` service account to post PR comments with proper
+attribution.
 
 ### Creating/Rotating the Token
 
@@ -31,10 +38,12 @@ service account to post PR comments with proper attribution.
 1. **Add to discrapp org:**
 
    ```bash
-   echo "<token>" | gh secret set HEIMDALLR_TOKEN --org discrapp --visibility all
+   echo "<token>" |
+     gh secret set HEIMDALLR_TOKEN --org discrapp --visibility all
    ```
 
-1. **Store in 1Password** under mosherlabs-heimdallr account for future reference
+1. **Store in 1Password** under mosherlabs-heimdallr account for future
+   reference
 
 ### Why This Token
 
@@ -44,8 +53,8 @@ service account to post PR comments with proper attribution.
 
 ## 💬 Slack Integration Setup
 
-The Heimdallr workflow can send notifications to Slack when releases are created.
-This requires two organization secrets from your Slack workspace.
+The Heimdallr workflow can send notifications to Slack when releases are
+created. This requires two organization secrets from your Slack workspace.
 
 ### Getting Slack Credentials
 

@@ -20,4 +20,5 @@ Discr is built with modern technologies:
 
 ## Getting Started
 
-Check out individual repositories for setup instructions and contribution guidelines.
+Check out individual repositories for setup instructions and contribution
+guidelines.

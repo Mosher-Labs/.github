@@ -28,12 +28,22 @@ via `workflow_call`.
 │   ├── release.yml             # Semantic versioning & releases
 │   ├── stale.yml               # Stale issue/PR management
 │   ├── terraform.yml           # Terraform plan/apply
+│   ├── terraform-module.yml    # Terraform module validate + test
 │   └── test.yml                # Node.js test runner
 ├── .pre-commit-config.yaml
 └── CLAUDE.md
 ```
 
 ## Workflows
+
+### terraform-module.yml
+
+CI for Terraform module repos, which have no backend. For each version in
+`terraform_versions` it runs `init -backend=false` and `validate` on the
+module and each example, then `terraform test`. Jobs are named
+`validate and test (<version>)`, so callers' required checks are
+`<caller job> / validate and test (<version>)`. Usage is in the file's
+header.
 
 ### release.yml
 
@@ -163,7 +173,8 @@ is to use Heimdallr workflow once re-enabled.
 1. **Commit with conventional format:** `git commit -m "type: description"`
 1. **Push and create PR:** `gh pr create --title "feat: description"`
 1. **Test with branch reference (critical!):** Before merging, test workflows
-   that reference other workflows by temporarily changing `@main` to `@your-branch`
+   that reference other workflows by temporarily changing `@main` to
+   `@your-branch`
 1. **Verify tests pass** in the PR
 1. **Change back to `@main`** before merging
 1. **Merge to main:** Consumers will use updated workflows
@@ -175,7 +186,8 @@ test them before merging to main.
 
 #### Example: Testing Heimdallr changes
 
-If you modify `heimdallr.yml` and also update `release.yml` to use the new version:
+If you modify `heimdallr.yml` and also update `release.yml` to use the new
+version:
 
 1. Create branch: `git checkout -b fix-heimdallr`
 1. Make changes to `heimdallr.yml`
@@ -236,7 +248,8 @@ pre-commit autoupdate           # Update hook versions
 ```
 
 **Note:** If actionlint-docker fails with Docker errors, you can use
-`--no-verify` as a last resort, but ONLY after manually validating workflow syntax.
+`--no-verify` as a last resort, but ONLY after manually validating workflow
+syntax.
 
 ## Consuming Repositories
 
@@ -332,7 +345,8 @@ Configuration: `.markdownlint.yaml` (allows 2-space indent, 120 char lines)
 1. **Test workflow changes** with branch references before merging
 1. **Never skip testing** - "Option 2: Just merge it" is only for break-glass
 1. **Run pre-commit hooks** BEFORE committing (fix all errors!)
-1. **Consider impact** - Changes affect ALL consuming repos (even with version pinning)
+1. **Consider impact** - Changes affect ALL consuming repos (even with version
+   pinning)
 1. **Document breaking changes** - Update this file and create migration guide
 1. **After merge:** Update consuming repos to new version (create PRs for each)
 1. **Communicate:** Notify team about new versions and required updates
@@ -350,17 +364,20 @@ Configuration: `.markdownlint.yaml` (allows 2-space indent, 120 char lines)
 **IMPORTANT:** The home network Pi-hole blocks analytics domains to prevent
 skewing metrics with development traffic. If you're debugging issues with:
 
-- **Sentry errors not appearing** - Pi-hole blocks `o4510563703193600.ingest.us.sentry.io`
-- **Cloudflare Analytics not tracking** - Pi-hole blocks `cloudflareinsights.com`
+- **Sentry errors not appearing** - Pi-hole blocks
+  `o4510563703193600.ingest.us.sentry.io`
+- **Cloudflare Analytics not tracking** - Pi-hole blocks
+  `cloudflareinsights.com`
 - **Segment events not sending** - Pi-hole blocks `api.segment.io`
 
 **To test analytics locally:**
 
 1. Temporarily disable Pi-hole blocking (Pi-hole admin → Disable → 5 minutes)
-2. Or use mobile data / a network without Pi-hole
-3. Or add the domains to Pi-hole's whitelist temporarily
+1. Or use mobile data / a network without Pi-hole
+1. Or add the domains to Pi-hole's whitelist temporarily
 
-**Configuration location:** `Mosher-Labs/homelab-gitops` → `apps/pihole/application.yaml`
+**Configuration location:** `Mosher-Labs/homelab-gitops` →
+`apps/pihole/application.yaml`
 
 **Blocked domains:**
 
@@ -374,7 +391,9 @@ skewing metrics with development traffic. If you're debugging issues with:
 
 - @README.md - Repository overview
 - GitHub Actions Docs: <https://docs.github.com/en/actions>
-- Reusable Workflows: <https://docs.github.com/en/actions/using-workflows/reusing-workflows>
+- [Reusable Workflows][rw]
+
+[rw]: https://docs.github.com/en/actions/using-workflows/reusing-workflows
 
 ---
 
