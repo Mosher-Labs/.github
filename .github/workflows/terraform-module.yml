@@ -1,0 +1,81 @@
+---
+# CI for Terraform module repos: validates the module and its examples
+# without a backend, and runs `terraform test`, once per Terraform version.
+# terraform.yml is for infrastructure repos that plan against a backend.
+#
+# Usage:
+#
+#   jobs:
+#     terraform:
+#       uses: "Mosher-Labs/.github/.github/workflows/terraform-module.yml@<sha>"  # vX.Y.Z
+#       permissions:
+#         contents: read
+#       with:
+#         terraform_versions: '["1.15.8", "1.16.4"]'
+#
+# The required status checks are then
+# "terraform / validate and test (<version>)".
+on:
+  workflow_call:
+    inputs:
+      terraform_versions:
+        description: >-
+          JSON list of Terraform versions to test, e.g. '["1.15.8", "1.16.4"]'.
+          Usually the oldest version the module's required_version allows and
+          the newest in use.
+        required: true
+        type: string
+      examples_path:
+        description: Directory whose subdirectories are example configurations.
+        required: false
+        type: string
+        default: examples
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    # Keep this name stable: callers use it in required status checks.
+    name: validate and test (${{ matrix.terraform }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        terraform: ${{ fromJSON(inputs.terraform_versions) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ matrix.terraform }}
+          terraform_wrapper: false
+
+      - name: Validate the module
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+
+      - name: Validate the examples
+        env:
+          EXAMPLES_PATH: ${{ inputs.examples_path }}
+        run: |
+          shopt -s nullglob
+          dirs=("$EXAMPLES_PATH"/*/)
+          if [ ${#dirs[@]} -eq 0 ]; then
+            echo "No examples under $EXAMPLES_PATH."
+            exit 0
+          fi
+          for dir in "${dirs[@]}"; do
+            echo "::group::$dir"
+            terraform -chdir="$dir" init -backend=false -input=false
+            terraform -chdir="$dir" validate
+            echo "::endgroup::"
+          done
+
+      # Tests that need a real provider should mock it, since this job has
+      # no credentials.
+      - name: Test
+        run: terraform test
