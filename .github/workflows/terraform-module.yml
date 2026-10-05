@@ -12,6 +12,7 @@
 #         contents: read
 #       with:
 #         terraform_versions: '["1.15.8", "1.16.4"]'
+#         test_directories: '["modules/datadog"]'  # optional
 #
 # The required status checks are then
 # "terraform / validate and test (<version>)".
@@ -30,6 +31,15 @@ on:
         required: false
         type: string
         default: examples
+      test_directories:
+        description: >-
+          JSON list of extra directories to run `terraform test` in, such as
+          '["modules/datadog"]'. For a submodule whose tests need a provider
+          mock the root module can't have, because the root doesn't require
+          that provider. The root's own tests always run.
+        required: false
+        type: string
+        default: '[]'
 
 permissions:
   contents: read
@@ -79,3 +89,14 @@ jobs:
       # no credentials.
       - name: Test
         run: terraform test
+
+      - name: Test the listed directories
+        env:
+          TEST_DIRECTORIES: ${{ inputs.test_directories }}
+        run: |
+          for dir in $(jq -r '.[]' <<<"$TEST_DIRECTORIES"); do
+            echo "::group::$dir"
+            terraform -chdir="$dir" init -backend=false -input=false
+            terraform -chdir="$dir" test
+            echo "::endgroup::"
+          done
